@@ -1,14 +1,19 @@
-# LuaMiSoWiDo
-A LuaForWindows distribution of Lua 5.1 5.2 and 5.3 including luarocks on each and a switching mechanism.
+# LuaWiMix
+A Lua distribution similar to LuaForWindows without anything but ilua, but with support for Lua 5.1 5.2 and 5.3 including optional luarocks and a switching mechanism.
 
-The switch is used in the commandline via "lua 5? %*" see the [batch files](src/lua.bat).
-This also applies to [luarocks](src/luarocks.bat)
+The switch is used in the commandline via "lua 5? %*" see the [batch files](src/wimix/lua.cmd).
+This also applies to [luarocks](src/wimix/arc/luarocks.cmd)
 
-You could add your own profile if you wish to. Just add a folder and put the lua.exe inside. DONE! eay as that!
-Add whatever you like. Only problem is the LUA_PATH/LUA_CPATH as you here need a little trickery. Once the installer is done, I will look into this.
-
-Luarocks is configured as follows:
+## Requirements
+<strong style="color: red;">[MinGW](http://mingw.org/) IS REQUIRED</strong>  
+LuaRocks is configured as follows:
 ```batch
-install /P "%LUA_ROOT%\lua\rocks\%profile_name%" /TREE "%LUA_ROOT%\lua\rocks\%profile_name%\systree" /LUA "%LUA_ROOT%\%profile_name%\" /MW /CMOD "%LUA_ROOT%\%profile_name%\clibs" /LUAMOD "%LUA_ROOT%\%profile_name%\lua"
+install /P "$INSTDIR\wimix\rocks\${major}${minor}$\"
+		/TREE "$INSTDIR\wimix\rocks\${major}${minor}\tree"
+		/CMOD "$INSTDIR\${major}${minor}\clibs"
+		/LUAMOD "$INSTDIR\${major}${minor}\lua" "
+		/LV ${major}.${minor}
+		/LUA "$INSTDIR\${major}${minor}\"
+		/MW /NOREG /Q
 ```
-
+Thus you need [MinGW](http://mingw.org/), the best would be to use [mingw-get](https://sourceforge.net/projects/mingw/files/Installer/).
