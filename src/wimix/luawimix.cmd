@@ -1,3 +1,5 @@
+@GOTO END
+@REM currently not supported
 @ECHO OFF
 SETLOCAL
 IF "%~1" == "" GOTO END
