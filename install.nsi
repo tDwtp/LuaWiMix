@@ -15,9 +15,9 @@ RequestExecutionLevel admin
 	; !define UMUI_NOLEFTIMAGE
 
 OutFile "${APP_NAME}.exe"
-; InstallDir $PROGRAMFILES\Lua
+InstallDir $PROGRAMFILES\Lua
 ; InstallDirRegKey HKLM "SOFTWARE\${APP_NAME}" ""
-InstallDir $APPDATA\Dummy\test
+; InstallDir $APPDATA\Dummy\test
 
 	!insertmacro MUI_PAGE_LICENSE "LICENSE"
 	!insertmacro MUI_PAGE_COMPONENTS
@@ -26,7 +26,7 @@ InstallDir $APPDATA\Dummy\test
 	!insertmacro MUI_PAGE_FINISH
 
 	!insertmacro MUI_UNPAGE_CONFIRM
-	!insertmacro MUI_UNPAGE_COMPONENTS
+	; !insertmacro MUI_UNPAGE_COMPONENTS
 	!insertmacro MUI_UNPAGE_INSTFILES
 	!insertmacro MUI_UNPAGE_FINISH
 	
@@ -48,9 +48,6 @@ InstallDir $APPDATA\Dummy\test
 ; -----------------------------------------------------------------------------
 ; - Macros
 ; -----------------------------------------------------------------------------
-
-!macro InstallRocks major minor
-!macroend
 
 !macro InstallSectLua major minor old
 		Section /o "${major}.${minor}" "SectLua${major}${minor}"
@@ -78,11 +75,14 @@ InstallDir $APPDATA\Dummy\test
 			File /oname=lib\liblua${major}${minor}.dll   src\${major}${minor}\lib\lua${major}${minor}.dll
 			
 			# if old
-			StrCmp "${old}" "true" 0 +3
+			StrCmp "${old}" "true" 0 LuaNotOld${major}${minor}
 			# then
-				File /oname=lib\liblua${major}${minor}.a     src\${major}${minor}\lib\liblua${major}.${minor}.a
-				File /oname=lib\liblua${major}${minor}.dll   src\${major}${minor}\lib\lua${major}.${minor}.dll
+				File /oname=lua${major}.${minor}.dll          src\${major}${minor}\lua${major}.${minor}.dll
+				File /oname=lib\liblua${major}.${minor}.a     src\${major}${minor}\lib\liblua${major}.${minor}.a
+				File /oname=lib\liblua${major}.${minor}.dll   src\${major}${minor}\lib\lua${major}.${minor}.dll
 			# end
+			LuaNotOld${major}${minor}:
+			
 			
 				WriteRegStr HKCR ".lua${major}${minor}"  "" "Lua${major}${minor}.Script"
 				WriteRegStr HKCR ".wlua${major}${minor}" "" "wLua${major}${minor}.Script"
@@ -124,10 +124,8 @@ InstallDir $APPDATA\Dummy\test
 			
 			Push $0
 			Push $1
-			
 			FileOpen $0 "$PLUGINSDIR\instrocks${major}${minor}.cmd" w
 			FileSeek $0 0 SET
-			
 			FileWrite $0 "@ECHO OFF$\r$\n"
 			; FileWrite $0 "ECHO.Start Installation$\r$\n"
 			FileWrite $0 "PUSHD $\"$INSTDIR\${WIMIX_FOLDER}\rocks\${WIMIX_FOLDER}$\"$\r$\n"
@@ -141,16 +139,16 @@ InstallDir $APPDATA\Dummy\test
 			FileWrite $0 "$\r$\n"
 			FileWrite $0 "POPD$\r$\n"
 			; FileWrite $0 "PAUSE$\r$\n"
-			
 			FileClose $0
-			
 			ExecWait "$PLUGINSDIR\instrocks${major}${minor}.cmd"
 			; ExecWait "$\"$INSTDIR\${WIMIX_FOLDER}\install\win32\lua5.1\bin\lua5.1.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\install\install.bat$\" /P $\"$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}$\" /TREE $\"$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\tree$\" /CMOD $\"$INSTDIR\${major}${minor}\clibs$\" /LUAMOD $\"$INSTDIR\${major}${minor}\lua$\" /LV ${major}.${minor} /LUA $\"$INSTDIR\${major}${minor}\$\" /MW /NOREG /Q"
-			
 			Delete "$PLUGINSDIR\instrocks${major}${minor}.cmd"
-			
 			Pop $1
 			Pop $0
+			
+			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks${major}${minor}.bat"
+			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks-admin.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks-admin${major}${minor}.bat"
+			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocksw.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocksw${major}${minor}.bat"
 			
 			; File /oname=LuaRocks${major}${minor}.txt dummy.txt
 		SectionEnd
@@ -383,6 +381,9 @@ Section ""
 		File /oname=lua-5.2.4_Win64_dllw4_lib.zip  src\${WIMIX_FOLDER}\arc\lua-5.2.4_Win64_dllw4_lib.zip
 		File /oname=lua-5.3.4_Win64_dllw4_lib.zip  src\${WIMIX_FOLDER}\arc\lua-5.3.4_Win64_dllw4_lib.zip
 	# end
+	File /oname=luarocks.cmd        src\${WIMIX_FOLDER}\arc\luarocks.cmd
+	File /oname=luarocks-admin.cmd  src\${WIMIX_FOLDER}\arc\luarocks-admin.cmd
+	File /oname=luarocksw.cmd       src\${WIMIX_FOLDER}\arc\luarocksw.cmd
 	
 	
 	CreateDirectory $INSTDIR\${WIMIX_FOLDER}\rocks
