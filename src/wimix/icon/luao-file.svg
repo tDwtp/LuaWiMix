@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128" height="512px" width="512px">
+<!--
+script-colors {
+	base: #5885FF;
+	base-light: #799DFF; /* base + (255 - base) * 0.2; */
+	edge: #7CBAFF; /* base * 1.4; */
+	edge-light: #96C8FF; /* edge + (255 - edge) * 0.2; */
+	/* edge-light: 1.4 *base + (255 - 1.4*base) * 0.2; */
+	logo: #00007F; // logo color
+}
+compiled-colors {
+	base: #7F1845;
+	edge: #B22261; /* base * 1.4; */
+	base-light: #99466A; /* base + (255 - base) * 0.2; */
+	edge-light: #C14E81; /* edge + (255 - edge) * 0.2; */
+	/* edge-light: 1.4 *base + (255 - 1.4*base) * 0.2; */
+	logo: #5F172C; // logo color
+}
+other-colors {
+	base: #7F4518;
+	edge: #B26122; /* base * 1.4; */
+	base-light: #996A46; /* base + (255 - base) * 0.2; */
+	edge-light: #C1814E; /* edge + (255 - edge) * 0.2; */
+	/* edge-light: 1.4 *base + (255 - 1.4*base) * 0.2; */
+	logo: #5F2C17; // logo color
+}
+-->
+	<!-- stroke -->
+	<polygon points="20,5 78,5 98,10 108,30 108,120 20,120" fill="none" stroke="#C3C3C3" stroke-width="4"/>
+	<!-- colored top area -->
+	<polygon points="20,5 78,5 108,30 20,30" fill="#7F4518" stroke="none"/>
+	<polygon points="20,5 78,5 96,20 20,20" fill="#996A46" stroke="none"/>
+	<!-- edge -->
+	<polygon points="78,5 98,10 108,30" fill="#B26122" stroke="none"/>
+	<polygon points="78,5 98,10 104,22 96,20" fill="#C1814E" stroke="none"/>
+	<!-- fill -->
+	<rect x="20" y="30" width="88" height="90" fill="#F8F8F8" stroke="none"/>
+	<!-- darker lower area -->
+	<rect x="20" y="110" width="88" height="10" fill="#ECECEC" stroke="none"/>
+	<!-- lua logo -->
+	<g transform="translate(31, 37.7)">
+		<!-- Lua Logo Copyright: see https://www.lua.org/ for more information
+		Copyright © 1998 Lua.org. Graphic design by Alexandre Nakonechnyj.
+
+		Permission is hereby granted, without written agreement and without license or royalty fees, to use, copy, and distribute this logo for any purpose, including commercial applications, subject to the following conditions:
+
+				The origin of this logo must not be misrepresented; you must not claim that you drew the original logo.
+				The only modification you can make is to adapt the orbiting text to your product name.
+				The logo can be used in any scale as long as the relative proportions of its elements are maintained. 
+		-->
+		<circle cx="32.15" cy="32.1" r="24.25" fill="#5F2C17"/>
+		<circle cx="56.3" cy="7.8" r="7" fill="#5F172C"/>
+		<circle cx="42.15" cy="22.1" r="7" fill="#FFFFFF"/>
+		<path d="M 60 18.2 a 31.1,31.25 0,1,1 -13.4,-13.8" stroke="#7F7F7F" stroke-dasharray="2.2, 3.24" fill="none" stroke-width="0.75px" stroke-linecap="round"/>
+		<path d="M 15.8,28.3 h2 v14.2 h7.8 v1.7 h-9.7 Z m 11.8,4.6 v9.4 c 0,2 4.3,4.3 7.3,0.2 v1.6 h1.6 v-11.2 h-1.7 v7 c -0.3,3.3 -5.5,4.7 -5.5,1 v-8 Z m 12.1,3.3 q0,-3.6 4.3,-3.6 q4.3,0 4.3,3.6 v6.3 q0,1.1 1.4,0.9 v1.3 c-2.1,0 -3,0 -3,-1.7 q-1.8,1.7 -4.2,1.7 q-3.3,0 -3.3,-3.3 c0,-5.2 7.7,-2.6 7.6,-5.2 q0,-1.9 -2.8,-1.9 q-2.8,0 -2.8,1.9 Z m 7,2.2 c0,1 -5.7,0 -5.7,3.2 q0,1.6 2.2,1.6 c2,0 3.5,-1.2 3.5,-2.6" stroke="none" fill="#FFFFFF"/>
+	</g>
+	<!-- lowercase lua in the bottom right -->
+	<path d="M 0,0 h1.8 v15.9 h-1.8 Z m 5.1,4.6 v9.4 c 0,2 4.3,4.3 7.3,0.2 v1.6 h1.6 v-11.2 h-1.7 v7 c -0.3,3.3 -5.5,4.7 -5.5,1 v-8 Z m 12.1,3.3 q0,-3.6 4.3,-3.6 q4.3,0 4.3,3.6 v6.3 q0,1.1 1.4,0.9 v1.3 c-2.1,0 -3,0 -3,-1.7 q-1.8,1.7 -4.2,1.7 q-3.3,0 -3.3,-3.3 c0,-5.2 7.7,-2.6 7.6,-5.2 q0,-1.9 -2.8,-1.9 q-2.8,0 -2.8,1.9 Z m 7,2.2 c0,1 -5.7,0 -5.7,3.2 q0,1.6 2.2,1.6 c2,0 3.5,-1.2 3.5,-2.6" stroke="none" fill="#3C3C3C" transform="translate(82.575,102.825) scale(0.75)"/>
+</svg>
