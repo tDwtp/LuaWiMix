@@ -1,8 +1,9 @@
 # LuaWiMix
 A Lua distribution similar to LuaForWindows without anything but ilua, but with support for Lua 5.1 5.2 and 5.3 including optional luarocks and a switching mechanism.
 
-The switch is used in the commandline via "lua 5? %*" see the [batch files](src/wimix/lua.cmd).
-This also applies to [luarocks](src/wimix/arc/luarocks.cmd)
+The switch is used in the commandline via "lua ?? %*" where you replace the ? with the major and minor version
+(5.1 would be 51, 5.1-1 would still be 51). Do not put the version between quotes.
+See the [lua batch files](src/wimix/lua.cmd) and the [luarocks batch files](src/wimix/arc/luarocks.cmd)
 
 ## Requirements
 <strong style="color: red;">[MinGW](http://mingw.org/) IS REQUIRED</strong>  
