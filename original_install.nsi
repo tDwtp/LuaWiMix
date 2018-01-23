@@ -1,38 +1,12 @@
-!define APP_VERSION_MAJOR 0
-!define APP_VERSION_MINOR 0
-!define APP_VERSION "${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}"
+!define APP_VERSION "0.0"
 !define APP_NAME "LuaWiMix"
 !define WIMIX_FOLDER "wimix"
 
-Unicode True
-RequestExecutionLevel admin
 Name "${APP_NAME} ${APP_VERSION}"
-OutFile "${APP_NAME}.exe"
-InstallDir $PROGRAMFILES\Lua
-; InstallDirRegKey HKLM "SOFTWARE\${APP_NAME}" ""
+RequestExecutionLevel admin
 
 	!include "UMUI.nsh"
-	!include "FileFunc.nsh"
-	!include "Sections.nsh"
-
-	!define UMUI_PARAMS_REGISTRY_ROOT HKLM
-	!define UMUI_PARAMS_REGISTRY_KEY "Software\LuaWiMix"
-	; test
-	; !define UMUI_USE_ALTERNATE_PAGE
-	; !define UMUI_MULTILANGUAGEPAGE_LANGUAGE "English"
-	; !define UMUI_MAINTENANCEPAGE_MODIFY
-	; !define UMUI_MAINTENANCEPAGE_REPAIR
-	; !define UMUI_MAINTENANCEPAGE_REMOVE
-		; !define UMUI_UNINSTALL_FULLPATH "$INSTDIR\uninstaller.exe"
-		; !define UMUI_UNINSTALLPATH_REGISTRY_VALUENAME  "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
-	; !define UMUI_MAINTENANCEPAGE_CONTINUE_SETUP
 	
-	!define UMUI_SETUPTYPEPAGE_MINIMAL "$(UMUI_TEXT_SETUPTYPE_MINIMAL_TITLE)"
-	!define UMUI_SETUPTYPEPAGE_STANDARD "$(UMUI_TEXT_SETUPTYPE_STANDARD_TITLE)"
-	!define UMUI_SETUPTYPEPAGE_COMPLETE "$(UMUI_TEXT_SETUPTYPE_COMPLETE_TITLE)"
-	!define UMUI_SETUPTYPEPAGE_DEFAULTCHOICE ${UMUI_COMPLETE}
-	
-	; defined
 	!define UMUI_SKIN "blue"
 	; !define UMUI_BGSKIN "blue"
 	; !define UMUI_USE_INSTALLOPTIONSEX
@@ -40,11 +14,12 @@ InstallDir $PROGRAMFILES\Lua
 	; !define MUI_COMPONENTSPAGE_SMALLDESC
 	; !define UMUI_NOLEFTIMAGE
 
-	; !insertmacro UMUI_PAGE_MULTILANGUAGE
-	!insertmacro MUI_PAGE_WELCOME
-	; !insertmacro UMUI_PAGE_MAINTENANCE
-	!insertmacro UMUI_PAGE_SETUPTYPE
-	!insertmacro MUI_PAGE_LICENSE "LICENSE" ; move this back up one line...
+OutFile "${APP_NAME}.exe"
+InstallDir $PROGRAMFILES\Lua
+; InstallDirRegKey HKLM "SOFTWARE\${APP_NAME}" ""
+; InstallDir $APPDATA\Dummy\test
+
+	!insertmacro MUI_PAGE_LICENSE "LICENSE"
 	!insertmacro MUI_PAGE_COMPONENTS
 	!insertmacro MUI_PAGE_DIRECTORY
 	!insertmacro MUI_PAGE_INSTFILES
@@ -65,6 +40,7 @@ InstallDir $PROGRAMFILES\Lua
 	; !insertmacro MUI_UNABORTWARNING
 	
 	; !insertmacro MUI_CUSTOMFUNCTION_ABORT CustomOnUserAbort
+	
 
 	!insertmacro MUI_LANGUAGE "English"
 	!insertmacro MUI_LANGUAGE "German"
@@ -73,44 +49,39 @@ InstallDir $PROGRAMFILES\Lua
 ; - Macros
 ; -----------------------------------------------------------------------------
 
-!macro AddToEnvironment var_name var_value
-	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\" $\"${var_value}$\""
-!macroend
-!macro RemoveFromEnvironment var_name
-	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\remEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\""
-!macroend
-
-!define OldVersion51
 !macro InstallSectLua major minor old
 		Section /o "${major}.${minor}" "SectLua${major}${minor}"
-			SetOutPath "$INSTDIR\${major}${minor}"
+			SetOutPath $INSTDIR\${major}${minor}
 			
-			CreateDirectory "$INSTDIR\${major}${minor}\clibs"
-			CreateDirectory "$INSTDIR\${major}${minor}\lua"
-			CreateDirectory "$INSTDIR\${major}${minor}\include"
-			CreateDirectory "$INSTDIR\${major}${minor}\lib"
-			CreateDirectory "$INSTDIR\${major}${minor}\docs"
-			CreateDirectory "$INSTDIR\${major}${minor}\example"
+			CreateDirectory $INSTDIR\${major}${minor}\clibs
+			CreateDirectory $INSTDIR\${major}${minor}\lua
+			CreateDirectory $INSTDIR\${major}${minor}\include
+			CreateDirectory $INSTDIR\${major}${minor}\lib
+			CreateDirectory $INSTDIR\${major}${minor}\docs
+			CreateDirectory $INSTDIR\${major}${minor}\example
 			
-			File /oname=lua${major}${minor}.exe   "src\${major}${minor}\lua${major}${minor}.exe"
-			File /oname=luac${major}${minor}.exe  "src\${major}${minor}\luac${major}${minor}.exe"
-			File /oname=wlua${major}${minor}.exe  "src\${major}${minor}\wlua${major}${minor}.exe"
-			File /oname=lua${major}${minor}.dll   "src\${major}${minor}\lua${major}${minor}.dll"
+			File /oname=lua${major}${minor}.exe   src\${major}${minor}\lua${major}${minor}.exe
+			File /oname=luac${major}${minor}.exe  src\${major}${minor}\luac${major}${minor}.exe
+			File /oname=wlua${major}${minor}.exe  src\${major}${minor}\wlua${major}${minor}.exe
+			File /oname=lua${major}${minor}.dll   src\${major}${minor}\lua${major}${minor}.dll
 			
-			File /oname=lua\ilua.lua       "src\${major}${minor}\lua\ilua.lua"
-			File /oname=include\lauxlib.h  "src\${major}${minor}\include\lauxlib.h"
-			File /oname=include\lua.h      "src\${major}${minor}\include\lua.h"
-			File /oname=include\lua.hpp    "src\${major}${minor}\include\lua.hpp"
-			File /oname=include\luaconf.h  "src\${major}${minor}\include\luaconf.h"
-			File /oname=include\lualib.h   "src\${major}${minor}\include\lualib.h"
-			File /oname=lib\liblua${major}${minor}.a     "src\${major}${minor}\lib\liblua${major}${minor}.a"
-			File /oname=lib\liblua${major}${minor}.dll   "src\${major}${minor}\lib\lua${major}${minor}.dll"
+			File /oname=lua\ilua.lua       src\${major}${minor}\lua\ilua.lua
+			File /oname=include\lauxlib.h  src\${major}${minor}\include\lauxlib.h
+			File /oname=include\lua.h      src\${major}${minor}\include\lua.h
+			File /oname=include\lua.hpp    src\${major}${minor}\include\lua.hpp
+			File /oname=include\luaconf.h  src\${major}${minor}\include\luaconf.h
+			File /oname=include\lualib.h   src\${major}${minor}\include\lualib.h
+			File /oname=lib\liblua${major}${minor}.a     src\${major}${minor}\lib\liblua${major}${minor}.a
+			File /oname=lib\liblua${major}${minor}.dll   src\${major}${minor}\lib\lua${major}${minor}.dll
 			
-			!ifdef OldVersion${major}${minor}
-				File /oname=lua${major}.${minor}.dll          "src\${major}${minor}\lua${major}.${minor}.dll"
-				File /oname=lib\liblua${major}.${minor}.a     "src\${major}${minor}\lib\liblua${major}.${minor}.a"
-				File /oname=lib\liblua${major}.${minor}.dll   "src\${major}${minor}\lib\lua${major}.${minor}.dll"
-			!endif
+			# if old
+			StrCmp "${old}" "true" 0 LuaNotOld${major}${minor}
+			# then
+				File /oname=lua${major}.${minor}.dll          src\${major}${minor}\lua${major}.${minor}.dll
+				File /oname=lib\liblua${major}.${minor}.a     src\${major}${minor}\lib\liblua${major}.${minor}.a
+				File /oname=lib\liblua${major}.${minor}.dll   src\${major}${minor}\lib\lua${major}.${minor}.dll
+			# end
+			LuaNotOld${major}${minor}:
 			
 			
 				WriteRegStr HKCR ".lua${major}${minor}"  "" "Lua${major}${minor}.Script"
@@ -134,19 +105,17 @@ InstallDir $PROGRAMFILES\Lua
 				WriteRegExpandStr HKCR "wLua${major}${minor}.Script\Shell\Edit\Command" "" "$\"$INSTDIR\${WIMIX_FOLDER}\SciTE\SciTE.exe$\" $\"%1$\""
 				
 				WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_DEV_${major}_${minor}" "$INSTDIR\${major}${minor}"
-			
-			!ifdef OldVersion${major}${minor}
-				!insertmacro AddToEnvironment "LUA_CPATH" ".\?.dll;.\?${major}${minor}.dll;$INSTDIR\${major}${minor}\?.dll;$INSTDIR\${major}${minor}\?${major}${minor}.dll;$INSTDIR\${major}${minor}\clibs\?.dll;$INSTDIR\${major}${minor}\clibs\?${major}${minor}.dll;$INSTDIR\${major}${minor}\loadall.dll;$INSTDIR\${major}${minor}\clibs\loadall.dll"
-				!insertmacro AddToEnvironment "LUA_PATH"  ".\?.lua;.\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.lua;$INSTDIR\${major}${minor}\lua\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?\init.lua;$INSTDIR\${major}${minor}\lua\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\?.lua;$INSTDIR\${major}${minor}\?.lua${major}${minor};$INSTDIR\${major}${minor}\?\init.lua;$INSTDIR\${major}${minor}\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.luac$INSTDIR\${major}${minor}\lua\?.luac${major}${minor}"
-			!else
-				!insertmacro AddToEnvironment "LUA_CPATH_${major}_${minor}" ".\?.dll;.\?${major}${minor}.dll;$INSTDIR\${major}${minor}\?.dll;$INSTDIR\${major}${minor}\?${major}${minor}.dll;$INSTDIR\${major}${minor}\clibs\?.dll;$INSTDIR\${major}${minor}\clibs\?${major}${minor}.dll;$INSTDIR\${major}${minor}\loadall.dll;$INSTDIR\${major}${minor}\clibs\loadall.dll"
-				!insertmacro AddToEnvironment "LUA_PATH_${major}_${minor}"  ".\?.lua;.\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.lua;$INSTDIR\${major}${minor}\lua\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?\init.lua;$INSTDIR\${major}${minor}\lua\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\?.lua;$INSTDIR\${major}${minor}\?.lua${major}${minor};$INSTDIR\${major}${minor}\?\init.lua;$INSTDIR\${major}${minor}\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.luac$INSTDIR\${major}${minor}\lua\?.luac${major}${minor}"
-			!endif
-			
-			StrCmp ${minor} "3" 0 NotMinimal
-				SectionIn 1 2
-			NotMinimal:
-				SectionIn 3
+			# if old
+			StrCmp "${old}" "true" 0 +4
+			# then
+				WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_CPATH" ".\?.dll;.\?${major}${minor}.dll;$INSTDIR\${major}${minor}\?.dll;$INSTDIR\${major}${minor}\?${major}${minor}.dll;$INSTDIR\${major}${minor}\clibs\?.dll;$INSTDIR\${major}${minor}\clibs\?${major}${minor}.dll;$INSTDIR\${major}${minor}\loadall.dll;$INSTDIR\${major}${minor}\clibs\loadall.dll"
+				WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_PATH" ".\?.lua;.\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.lua;$INSTDIR\${major}${minor}\lua\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?\init.lua;$INSTDIR\${major}${minor}\lua\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\?.lua;$INSTDIR\${major}${minor}\?.lua${major}${minor};$INSTDIR\${major}${minor}\?\init.lua;$INSTDIR\${major}${minor}\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.luac$INSTDIR\${major}${minor}\lua\?.luac${major}${minor}"
+				Goto IfEndOldEnv
+			# else
+				WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_CPATH_${major}_${minor}" ".\?.dll;.\?${major}${minor}.dll;$INSTDIR\${major}${minor}\?.dll;$INSTDIR\${major}${minor}\?${major}${minor}.dll;$INSTDIR\${major}${minor}\clibs\?.dll;$INSTDIR\${major}${minor}\clibs\?${major}${minor}.dll;$INSTDIR\${major}${minor}\loadall.dll;$INSTDIR\${major}${minor}\clibs\loadall.dll"
+				WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_PATH_${major}_${minor}" ".\?.lua;.\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.lua;$INSTDIR\${major}${minor}\lua\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?\init.lua;$INSTDIR\${major}${minor}\lua\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\?.lua;$INSTDIR\${major}${minor}\?.lua${major}${minor};$INSTDIR\${major}${minor}\?\init.lua;$INSTDIR\${major}${minor}\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.luac$INSTDIR\${major}${minor}\lua\?.luac${major}${minor}"
+			# end
+			IfEndOldEnv:
 		SectionEnd
 !macroend
 !macro InstallSectLuaRocks major minor
@@ -182,11 +151,6 @@ InstallDir $PROGRAMFILES\Lua
 			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocksw.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocksw${major}${minor}.bat"
 			
 			; File /oname=LuaRocks${major}${minor}.txt dummy.txt
-			
-			StrCmp ${minor} "3" 0 NotMinimal
-				SectionIn 2
-			NotMinimal:
-				SectionIn 3
 		SectionEnd
 !macroend
 !macro InstallSectDefault major minor
@@ -202,10 +166,6 @@ InstallDir $PROGRAMFILES\Lua
 			Pop $0
 			
 			WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_DEV" "$INSTDIR\${major}${minor}"
-			
-			StrCmp ${minor} "3" 0 NotMinimal
-				SectionIn 1 2 3
-			NotMinimal:
 		SectionEnd
 !macroend
 
@@ -222,17 +182,16 @@ InstallDir $PROGRAMFILES\Lua
 				
 				DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_DEV_${major}_${minor}"
 			# if old
-			StrCmp "${old}" "true" 0 OldEnvElse
+			StrCmp "${old}" "true" 0 +4
 			# then
-				!insertmacro RemoveFromEnvironment "LUA_CPATH"
-				!insertmacro RemoveFromEnvironment "LUA_PATH"
-			Goto OldEnvEnd
+				DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_CPATH"
+				DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_PATH"
+				Goto IfEndOldEnv
 			# else
-			OldEnvElse:
-				!insertmacro RemoveFromEnvironment "LUA_CPATH_${major}_${minor}"
-				!insertmacro RemoveFromEnvironment "LUA_PATH_${major}_${minor}"
+				DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_CPATH_${major}_${minor}"
+				DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_PATH_${major}_${minor}"
 			# end
-			OldEnvEnd:
+			IfEndOldEnv:
 		SectionEnd
 !macroend
 !macro UninstallSectLuaRocks major minor
@@ -356,9 +315,12 @@ InstallDir $PROGRAMFILES\Lua
 	CheckDef${major}${minor}:
 !macroend
 
+
 ; -----------------------------------------------------------------------------
 ; - Settings
 ; -----------------------------------------------------------------------------
+
+!include Sections.nsh
 
 Var DepMiWiRocks
 Var DepLua51
@@ -374,18 +336,9 @@ Var DepDef53
 
 Var Bits
 
-InstType "$(UMUI_TEXT_SETUPTYPE_MINIMAL_TITLE)"
-InstType "$(UMUI_TEXT_SETUPTYPE_STANDARD_TITLE)"
-InstType "$(UMUI_TEXT_SETUPTYPE_COMPLETE_TITLE)"
-
 ; -----------------------------------------------------------------------------
 ; - Installing
 ; -----------------------------------------------------------------------------
-
-Section "-RunFirst"
-	SectionIn RO
-	SectionIn 1 2 3
-SectionEnd
 
 Section ""
 	SectionIn RO
@@ -403,7 +356,6 @@ Section ""
 	
 	;; lua
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}\icon
-	File /oname=lua-logo.ico       src\${WIMIX_FOLDER}\icon\lua-logo.ico
 	File /oname=lua-file.ico       src\${WIMIX_FOLDER}\icon\lua-file.ico
 	File /oname=luac-file.ico      src\${WIMIX_FOLDER}\icon\luac-file.ico
 	File /oname=luarocks-file.ico  src\${WIMIX_FOLDER}\icon\luarocks-file.ico
@@ -432,9 +384,6 @@ Section ""
 	File /oname=luarocks.cmd        src\${WIMIX_FOLDER}\arc\luarocks.cmd
 	File /oname=luarocks-admin.cmd  src\${WIMIX_FOLDER}\arc\luarocks-admin.cmd
 	File /oname=luarocksw.cmd       src\${WIMIX_FOLDER}\arc\luarocksw.cmd
-	
-	File /oname=addEnv.vbs  src\${WIMIX_FOLDER}\arc\addEnv.vbs
-	File /oname=remEnv.vbs  src\${WIMIX_FOLDER}\arc\remEnv.vbs
 	
 	
 	CreateDirectory $INSTDIR\${WIMIX_FOLDER}\rocks
@@ -465,27 +414,15 @@ Section ""
 		WriteRegExpandStr HKCR  "Lua.Script\Shell\Edit\Command" "" "$\"$INSTDIR\${WIMIX_FOLDER}\SciTE\SciTE.exe$\" $\"%1$\""
 		WriteRegExpandStr HKCR "wLua.Script\Shell\Edit\Command" "" "$\"$INSTDIR\${WIMIX_FOLDER}\SciTE\SciTE.exe$\" $\"%1$\""
 		
-		!insertmacro AddToEnvironment "LUA_MIWI" "$INSTDIR"
-		!insertmacro AddToEnvironment "LUA_DEV" "$INSTDIR\$DepDef"
+		WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_MIWI" "$INSTDIR"
+	
+		WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_MIWI" "$INSTDIR"
 	
 	WriteUninstaller $INSTDIR\uninstall.exe
 	
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayName" "${APP_NAME} ${APP_VERSION}"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "QuietUninstallString" "$\"$\"$INSTDIR\uninstall.exe$\" /S"
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayVersion" "${APP_VERSION}"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayIcon" "$INSTDIR\${WIMIX_FOLDER}\icon\lua-logo.ico"
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "VersionMajor" ${APP_VERSION_MAJOR}
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "VersionMinor" ${APP_VERSION_MINOR}
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "NoModify" 1
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "NoRepair" 1
-	; WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "Readme" "$INSTDIR\${WIMIX_FOLDER}\arc\readme.txt"
-	; WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "HelpLink" "https://github.com/tDwtp/LuaWiMix/issues"
-	; WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "HelpLink" "https://github.com/tDwtp/LuaWiMix/blob/master/wiki/index.md"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "URLUpdateInfo" "https://github.com/tDwtp/LuaWiMix/releases/latest"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "URLInfoAbout" "https://github.com/tDwtp/LuaWiMix/blob/master/README.md"
-	
-	
+	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
 	
 SectionEnd
 
@@ -551,24 +488,12 @@ SectionEnd
 
 Section	"-RunLast" SectRunLast
 	SectionIn RO
-	Push $0
-	Push $1
-	Push $2
-	${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
-	Pop $2
-	Pop $1
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "EstimatedSize" $0
-	Pop $0
 SectionEnd
 
 ; -----------------------------------------------------------------------------
 ; - Uninstalling
 ; -----------------------------------------------------------------------------
 
-Section "un.-RunFirst"
-	SectionIn RO
-	
-SectionEnd
 Section "un.Add MiWi to Path" UnSectPath
 	GetTempFileName $0
 	File /oname=$0 "remove_if_present.vbs"
@@ -598,7 +523,6 @@ Section "un.MiWiRocks" UnSectWiMicRocks
 	SetOutPath $INSTDIR
 	
 	RMDir /r $INSTDIR\${WIMIX_FOLDER}\rocks
-	RMDir /r $APPDATA\LuaRocks
 	
 	Delete $INSTDIR\${WIMIX_FOLDER}\luarocks.cmd
 	Delete $INSTDIR\${WIMIX_FOLDER}\luarocks-admin.cmd
@@ -640,20 +564,64 @@ Section	"un.-RunLast" UnSectRunLast
 		DeleteRegKey HKCR "wLua.Script"
 		DeleteRegKey HKCR "Lua.Compiled"
 		
-		!insertmacro RemoveFromEnvironment "LUA_MIWI"
-		!insertmacro RemoveFromEnvironment "LUA_DEV"
+		DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_DEV"
+		DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "LUA_MIWI"
 	
 	
-	; MessageBox MB_YESNO "remove uninstaller?" /SD IDYES IDNO DontRemoveUninstaller
+	MessageBox MB_YESNO "remove uninstaller?" /SD IDYES IDNO DontRemoveUninstaller
 		DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
 		Delete $INSTDIR\uninstall.exe
-	; DontRemoveUninstaller:
+	DontRemoveUninstaller:
 	
-	; MessageBox MB_YESNO "remove install dir (only works if empty)?" /SD IDYES IDNO DontRemoveDir
+	MessageBox MB_YESNO "remove install dir (only works if empty)?" /SD IDYES IDNO DontRemoveDir
 		RMDir $INSTDIR
-	; DontRemoveDir:
+	DontRemoveDir:
 SectionEnd
 
+; -----------------------------------------------------------------------------
+; - Language
+; -----------------------------------------------------------------------------
+
+LangString DESC_SectLua      ${LANG_ENGLISH} "Choose which Lua versions to install (default version is mndatory)"
+LangString DESC_SectLua51    ${LANG_ENGLISH} "Lua version 5.1"
+LangString DESC_SectLua52    ${LANG_ENGLISH} "Lua version 5.2"
+LangString DESC_SectLua53    ${LANG_ENGLISH} "Lua version 5.3"
+LangString DESC_SectRocks    ${LANG_ENGLISH} "Choose which Lua version should get a LuaRocks installation (optional)"
+LangString DESC_SectRocks51  ${LANG_ENGLISH} "LuaRocks for Lua version 5.1"
+LangString DESC_SectRocks52  ${LANG_ENGLISH} "LuaRocks for Lua version 5.2"
+LangString DESC_SectRocks53  ${LANG_ENGLISH} "LuaRocks for Lua version 5.3"
+LangString DESC_SectDef      ${LANG_ENGLISH} "Choose which Lua version should be set as default (mandatory)"
+LangString DESC_SectDef51    ${LANG_ENGLISH} "Set Lua 5.1 as default Lua version"
+LangString DESC_SectDef52    ${LANG_ENGLISH} "Set Lua 5.2 as default Lua version"
+LangString DESC_SectDef53    ${LANG_ENGLISH} "Set Lua 5.3 as default Lua version"
+LangString DESC_SectPath     ${LANG_ENGLISH} "Adds LuaWiMix to the environment-variable Path. This way you will be able to call it in the commandline (cmd.exe)"
+
+LangString DESC_SectLua      ${LANG_GERMAN} "Wähle die zu installierenden Lua-Versionen aus (Die standard-Version muss installiert werden)"
+LangString DESC_SectLua51    ${LANG_GERMAN} "Lua Version 5.1"
+LangString DESC_SectLua52    ${LANG_GERMAN} "Lua Version 5.2"
+LangString DESC_SectLua53    ${LANG_GERMAN} "Lua Version 5.3"
+LangString DESC_SectRocks    ${LANG_GERMAN} "Wähle aus, welche Lua Version(en) eine LuaRocks installation erhalten sollen (optional)"
+LangString DESC_SectRocks51  ${LANG_GERMAN} "LuaRocks für Lua version 5.1"
+LangString DESC_SectRocks52  ${LANG_GERMAN} "LuaRocks für Lua version 5.2"
+LangString DESC_SectRocks53  ${LANG_GERMAN} "LuaRocks für Lua version 5.3"
+LangString DESC_SectDef      ${LANG_GERMAN} "Wähle die Standard Lua-Version aus (pflicht)"
+LangString DESC_SectDef51    ${LANG_GERMAN} "Setzt Lua 5.1 als Standardversion fest"
+LangString DESC_SectDef52    ${LANG_GERMAN} "Setzt Lua 5.2 als Standardversion fest"
+LangString DESC_SectDef53    ${LANG_GERMAN} "Setzt Lua 5.3 als Standardversion fest"
+LangString DESC_SectPath     ${LANG_GERMAN} "Fügt LuaWiMix der Umgebungsvariable Path hinzu. Auf diese Weise kann lua (und luarocks) in der Kommandozeile (cmd.exe) genutzt werden."
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectLua51}   $(DESC_SectLua51)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectLua52}   $(DESC_SectLua52)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectLua53}   $(DESC_SectLua53)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectRocks51} $(DESC_SectRocks51)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectRocks52} $(DESC_SectRocks52)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectRocks53} $(DESC_SectRocks53)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectDef51}   $(DESC_SectDef51)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectDef52}   $(DESC_SectDef52)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectDef53}   $(DESC_SectDef53)
+	!insertmacro MUI_DESCRIPTION_TEXT ${SectPath}    $(DESC_SectPath)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
 ; }
 
 ; -----------------------------------------------------------------------------
@@ -662,7 +630,6 @@ SectionEnd
 Function .onInit
     InitPluginsDir
 	StrCpy $Language ${LANG_ENGLISH}
-	; !insertmacro UMUI_MULTILANG_GET
     !insertmacro MUI_LANGDLL_DISPLAY
 	StrCpy $Bits "32" ; we currently only support 32 bits :P
 	
@@ -783,19 +750,6 @@ Function .onInstSuccess
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
 	
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayVersion" "${APP_VERSION}"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayIcon" "$INSTDIR\${WIMIX_FOLDER}\icon\lua-logo.ico"
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "VersionMajor" ${APP_VERSION_MAJOR}
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "VersionMinor" ${APP_VERSION_MINOR}
-	
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "NoModify" 1
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "NoRepair" 1
-	; WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "Readme" "$INSTDIR\${WIMIX_FOLDER}\arc\readme.txt"
-	; WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "HelpLink" "https://github.com/tDwtp/LuaWiMix/issues"
-	; WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "HelpLink" "https://github.com/tDwtp/LuaWiMix/blob/master/wiki/index.md"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "URLUpdateInfo" "https://github.com/tDwtp/LuaWiMix/releases/latest"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "URLInfoAbout" "https://github.com/tDwtp/LuaWiMix/blob/master/README.md"
-	
 FunctionEnd
 Function .onInstFailed
 	; save an uninstaller
@@ -804,68 +758,24 @@ Function .onInstFailed
 	Exec $INSTDIR\uninstall.exe
 FunctionEnd
 
+/*
+Section /o "LuaRocks 5.1"
+	; Only if Section "Lua 5.1"
+	ExecWait "install\install.bat /P $\"$INSTDIR\lua\rocks\51$\" /TREE $\"$INSTDIR\lua\rocks\51\tree$\" /LUA $\"$INSTDIR\51\$\" /MW /CMOD $\"$INSTDIR\51\clibs$\" /LUAMOD $\"$INSTDIR\51\lua$\""
+	; SetOutPath $INSTDIR\lua\rocks
+SectionEnd
 ; -----------------------------------------------------------------------------
 ; - Uninstalling
 ; -----------------------------------------------------------------------------
-Function un.onInit
-	; !insertmacro UMUI_MULTILANG_GET
-FunctionEnd
-
-; -----------------------------------------------------------------------------
-; - Language
-; -----------------------------------------------------------------------------
-
-LangString DESC_SectLua      ${LANG_ENGLISH} "Choose which Lua versions to install (default version is mndatory)"
-LangString DESC_SectLua51    ${LANG_ENGLISH} "Lua version 5.1"
-LangString DESC_SectLua52    ${LANG_ENGLISH} "Lua version 5.2"
-LangString DESC_SectLua53    ${LANG_ENGLISH} "Lua version 5.3"
-LangString DESC_SectRocks    ${LANG_ENGLISH} "Choose which Lua version should get a LuaRocks installation (optional)"
-LangString DESC_SectRocks51  ${LANG_ENGLISH} "LuaRocks for Lua version 5.1"
-LangString DESC_SectRocks52  ${LANG_ENGLISH} "LuaRocks for Lua version 5.2"
-LangString DESC_SectRocks53  ${LANG_ENGLISH} "LuaRocks for Lua version 5.3"
-LangString DESC_SectDef      ${LANG_ENGLISH} "Choose which Lua version should be set as default (mandatory)"
-LangString DESC_SectDef51    ${LANG_ENGLISH} "Set Lua 5.1 as default Lua version"
-LangString DESC_SectDef52    ${LANG_ENGLISH} "Set Lua 5.2 as default Lua version"
-LangString DESC_SectDef53    ${LANG_ENGLISH} "Set Lua 5.3 as default Lua version"
-LangString DESC_SectPath     ${LANG_ENGLISH} "Adds LuaWiMix to the environment-variable Path. This way you will be able to call it in the commandline (cmd.exe)"
-
-LangString DESC_SectLua      ${LANG_GERMAN} "Wähle die zu installierenden Lua-Versionen aus (Die standard-Version muss installiert werden)"
-LangString DESC_SectLua51    ${LANG_GERMAN} "Lua Version 5.1"
-LangString DESC_SectLua52    ${LANG_GERMAN} "Lua Version 5.2"
-LangString DESC_SectLua53    ${LANG_GERMAN} "Lua Version 5.3"
-LangString DESC_SectRocks    ${LANG_GERMAN} "Wähle aus, welche Lua Version(en) eine LuaRocks installation erhalten sollen (optional)"
-LangString DESC_SectRocks51  ${LANG_GERMAN} "LuaRocks für Lua version 5.1"
-LangString DESC_SectRocks52  ${LANG_GERMAN} "LuaRocks für Lua version 5.2"
-LangString DESC_SectRocks53  ${LANG_GERMAN} "LuaRocks für Lua version 5.3"
-LangString DESC_SectDef      ${LANG_GERMAN} "Wähle die Standard Lua-Version aus (pflicht)"
-LangString DESC_SectDef51    ${LANG_GERMAN} "Setzt Lua 5.1 als Standardversion fest"
-LangString DESC_SectDef52    ${LANG_GERMAN} "Setzt Lua 5.2 als Standardversion fest"
-LangString DESC_SectDef53    ${LANG_GERMAN} "Setzt Lua 5.3 als Standardversion fest"
-LangString DESC_SectPath     ${LANG_GERMAN} "Fügt LuaWiMix der Umgebungsvariable Path an. Auf diese Weise kann lua (und luarocks) in der Kommandozeile (cmd.exe) genutzt werden."
-
-!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectLua51}   $(DESC_SectLua51)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectLua52}   $(DESC_SectLua52)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectLua53}   $(DESC_SectLua53)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectRocks51} $(DESC_SectRocks51)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectRocks52} $(DESC_SectRocks52)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectRocks53} $(DESC_SectRocks53)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectDef51}   $(DESC_SectDef51)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectDef52}   $(DESC_SectDef52)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectDef53}   $(DESC_SectDef53)
-	!insertmacro MUI_DESCRIPTION_TEXT ${SectPath}    $(DESC_SectPath)
-!insertmacro MUI_FUNCTION_DESCRIPTION_END
-
+	Var SMFOLDER
+	!insertmacro MUI_STARTMENU_GETFOLDER page_id $SMFOLDER
+		Delete "$SMPROGRAMS\$SMFOLDER"
+	
+; uninstall startmenu...
+; */
 
 ; -----------------------------------------------------------------------------
 ; - Notes
 ; -----------------------------------------------------------------------------
 
 ; DeleteRegKey HKLM "SOFTWARE\${NAME}"
-
-/*
-	Var SMFOLDER
-	!insertmacro MUI_STARTMENU_GETFOLDER page_id $SMFOLDER
-		Delete "$SMPROGRAMS\$SMFOLDER"
-; uninstall startmenu...
-; */
