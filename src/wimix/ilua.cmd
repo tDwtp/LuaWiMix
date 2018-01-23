@@ -1,6 +1,22 @@
-@if     exist %~dps0\..\%1\lua%1.exe @%~dps0\..\%1\lua%* -e "require('ilua')"
-@set /p LUA_PROFILE=<%~pds0\default-version.txt >nul 2>nul
-@if not defined LUA_PROFILE set LUA_PROFILE=53
-@if not exist "%~pds0\..\%LUA_PROFILE%" set LUA_PROFILE=53
-@if "%LUA_PROFILE%" == "wimix" set LUA_PROFILE=53
-@if not exist %~dps0\..\%1\lua%1.exe @%~dps0\..\%LUA_PROFILE%\lua%LUA_PROFILE% -e "require('ilua')" %*
+@ECHO OFF
+GOTO HANDLE
+
+:APPEND_PATH
+FOR %%# IN (lua%1.exe) DO IF NOT "%%~$PATH:#" == "" GOTO END
+PUSHD .
+CD /D "%~dp0\..\%1"
+SET "Path=%Path%;%CD%"
+POPD
+GOTO END
+
+:HANDLE
+IF NOT EXIST "%~dp0\..\%1\%~n0%1.exe" GOTO USEDEFAULT
+CALL :APPEND_PATH %1
+%~n0%*
+GOTO END
+
+:USEDEFAULT
+CALL :APPEND_PATH %1
+%~n053 %*
+
+:END
