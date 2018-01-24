@@ -1,6 +1,6 @@
 
 If WScript.Arguments.Count <> 2 Then
-	WScript.Echo "Usage: addLuaEnv.vbs <major> <minor>"
+	WScript.Echo "Usage: addEnv.vbs <major> <minor>"
 	WScript.Quit(1)
 End If
 
@@ -28,15 +28,14 @@ If objFso.FolderExists(instDir & "\" & major & minor) Then
 	WScript.Quit(4)
 End If
 
-If Not objFso.FileExists(instDir & "\wimix\arc\lua"& major & minor &"x86.zip") Then
-	WScript.Echo "No archive (""lua"& major & minor &"x86.zip"") found at """ & instDir & "\wimix\arc"""
+If Not objFso.FileExists(instDir & "\wimix\arc\lua"& major & minor &".zip") Then
+	WScript.Echo "No archive (""lua"& major & minor &".zip"") found at """ & instDir & "\wimix\arc"""
 	WScript.Quit(6)
 End If
 
 objFso.CreateFolder(instDir & "\" & major & minor)
 objFso.CreateFolder(instDir & "\" & major & minor & "\include")
 objFso.CreateFolder(instDir & "\" & major & minor & "\libs")
-objFso.CreateFolder(instDir & "\" & major & minor & "\clibs")
 objFso.CreateFolder(instDir & "\" & major & minor & "\clibs")
 objFso.CreateFolder(instDir & "\" & major & minor & "\lua")
 objFso.CreateFolder(instDir & "\" & major & minor & "\examples")
@@ -46,6 +45,6 @@ objFso.CreateFolder(instDir & "\" & major & minor & "\docs")
 Set objApp = CreateObject("Shell.Application")
 ' 1556, as options to CopyHere
 
-Set objSrc = objApp.NameSpace(instDir & "\wimix\arc\lua"& major & minor &"x86.zip").Items()
+Set objSrc = objApp.NameSpace(instDir & "\wimix\arc\lua"& major & minor &".zip").Items()
 Set objDst = objApp.NameSpace(instDir & "\" & major & minor)
 objDst.CopyHere objSrc, 1556

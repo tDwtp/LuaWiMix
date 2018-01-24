@@ -30,7 +30,7 @@ Do
 
 	If curPath = "" Then
 		Rem "IsEmpty"
-		exitCode = eixitCode Or 4
+		exitCode = exitCode Or 4
 		Exit Do
 	End If
 
@@ -70,13 +70,19 @@ Do
 		Exit Do
 	End If
 
+	If curPath = remPath Or curPath = (";" & remPath) Or curPath = (";" & remPath & ";") Or curPath = (remPath & ";") Then
+		Rem IsEqual
+		objEnv(sysVarName) = ""
+		Exit Do
+	End If
+
 	If curPath = remPath Or curPath = (";" & remPath) Then
 		Rem IsEqual
 		objEnv(sysVarName) = ""
 		Exit Do
 	End If
 	
-	exitCode = 2
+	exitCode = exitCode Or 2
 Loop While False
 Next
 

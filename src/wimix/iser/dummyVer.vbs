@@ -1,6 +1,6 @@
 
 Sub DefaultVersion
-	WScript.Echo "53"
+	WScript.Echo "wimix"
 	WScript.Quit(0)
 End Sub
 
