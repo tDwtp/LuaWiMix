@@ -1,10 +1,7 @@
 !ifndef __LANGUAGES_H__
 !define __LANGUAGES_H__
 
-!insertmacro MUI_LANGUAGE "English"
-!insertmacro MUI_LANGUAGE "German"
-
-/*
+; /*
 LangString DESC_SectLua      ${LANG_ENGLISH} "Choose which Lua versions to install (default version is mndatory)"
 LangString DESC_SectLua51    ${LANG_ENGLISH} "Lua version 5.1"
 LangString DESC_SectLua52    ${LANG_ENGLISH} "Lua version 5.2"

@@ -43,8 +43,8 @@ InstallDir $PROGRAMFILES\Lua
 	; !insertmacro UMUI_PAGE_MULTILANGUAGE
 	!insertmacro MUI_PAGE_WELCOME
 	; !insertmacro UMUI_PAGE_MAINTENANCE
-	!insertmacro UMUI_PAGE_SETUPTYPE
 	!insertmacro MUI_PAGE_LICENSE "LICENSE" ; move this back up one line...
+	!insertmacro UMUI_PAGE_SETUPTYPE
 	!insertmacro MUI_PAGE_COMPONENTS
 	!insertmacro MUI_PAGE_DIRECTORY
 	!insertmacro MUI_PAGE_INSTFILES
@@ -74,10 +74,10 @@ InstallDir $PROGRAMFILES\Lua
 ; -----------------------------------------------------------------------------
 
 !macro AddToEnvironment var_name var_value
-	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\" $\"${var_value}$\""
+	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addAnyEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\" $\"${var_value}$\""
 !macroend
 !macro RemoveFromEnvironment var_name
-	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\remEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\""
+	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\remAnyEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\""
 !macroend
 
 !define OldVersion51
@@ -393,8 +393,6 @@ Section ""
 	
 	
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}
-	File /oname=7z.exe src\${WIMIX_FOLDER}\7z.exe
-	File /oname=7z.dll src\${WIMIX_FOLDER}\7z.dll
 	
 	File /oname=lua.cmd   src\${WIMIX_FOLDER}\lua.cmd
 	File /oname=wlua.cmd  src\${WIMIX_FOLDER}\wlua.cmd
@@ -411,30 +409,34 @@ Section ""
 	;; lua\arc
 	; CreateDirectory $INSTDIR\lua\arc
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}\arc
-	StrCmp $Bits "32" 0 +7
+	StrCmp $Bits "32" 0 No32
 	# then ; 32
-		File /oname=lua-5.1.5_Win32_bin.zip        src\${WIMIX_FOLDER}\arc\lua-5.1.5_Win32_bin.zip
-		File /oname=lua-5.2.4_Win32_bin.zip        src\${WIMIX_FOLDER}\arc\lua-5.2.4_Win32_bin.zip
-		File /oname=lua-5.3.4_Win32_bin.zip        src\${WIMIX_FOLDER}\arc\lua-5.3.4_Win32_bin.zip
-		File /oname=lua-5.1.5_Win32_dllw4_lib.zip  src\${WIMIX_FOLDER}\arc\lua-5.1.5_Win32_dllw4_lib.zip
-		File /oname=lua-5.2.4_Win32_dllw4_lib.zip  src\${WIMIX_FOLDER}\arc\lua-5.2.4_Win32_dllw4_lib.zip
-		File /oname=lua-5.3.4_Win32_dllw4_lib.zip  src\${WIMIX_FOLDER}\arc\lua-5.3.4_Win32_dllw4_lib.zip
+		File /oname=lua51.zip        src\${WIMIX_FOLDER}\arc\lua51x86.zip
+		File /oname=lua52.zip        src\${WIMIX_FOLDER}\arc\lua52x86.zip
+		File /oname=lua53.zip        src\${WIMIX_FOLDER}\arc\lua53x86.zip
+	No32:
 	# end
-	StrCmp $Bits "64" 0 +7
+	StrCmp $Bits "64" 0 No64
 	# then ; 64
-		File /oname=lua-5.1.5_Win64_bin.zip        src\${WIMIX_FOLDER}\arc\lua-5.1.5_Win64_bin.zip
-		File /oname=lua-5.2.4_Win64_bin.zip        src\${WIMIX_FOLDER}\arc\lua-5.2.4_Win64_bin.zip
-		File /oname=lua-5.3.4_Win64_bin.zip        src\${WIMIX_FOLDER}\arc\lua-5.3.4_Win64_bin.zip
-		File /oname=lua-5.1.5_Win64_dllw4_lib.zip  src\${WIMIX_FOLDER}\arc\lua-5.1.5_Win64_dllw4_lib.zip
-		File /oname=lua-5.2.4_Win64_dllw4_lib.zip  src\${WIMIX_FOLDER}\arc\lua-5.2.4_Win64_dllw4_lib.zip
-		File /oname=lua-5.3.4_Win64_dllw4_lib.zip  src\${WIMIX_FOLDER}\arc\lua-5.3.4_Win64_dllw4_lib.zip
+		File /oname=lua51.zip        src\${WIMIX_FOLDER}\arc\lua51amd64.zip
+		File /oname=lua52.zip        src\${WIMIX_FOLDER}\arc\lua52amd64.zip
+		File /oname=lua53.zip        src\${WIMIX_FOLDER}\arc\lua53amd64.zip
+	No64:
 	# end
 	File /oname=luarocks.cmd        src\${WIMIX_FOLDER}\arc\luarocks.cmd
 	File /oname=luarocks-admin.cmd  src\${WIMIX_FOLDER}\arc\luarocks-admin.cmd
 	File /oname=luarocksw.cmd       src\${WIMIX_FOLDER}\arc\luarocksw.cmd
 	
-	File /oname=addEnv.vbs  src\${WIMIX_FOLDER}\arc\addEnv.vbs
-	File /oname=remEnv.vbs  src\${WIMIX_FOLDER}\arc\remEnv.vbs
+	File /oname=addAnyEnv.vbs  src\${WIMIX_FOLDER}\iser\addAnyEnv.vbs
+	File /oname=remAnyEnv.vbs  src\${WIMIX_FOLDER}\iser\remAnyEnv.vbs
+	File /oname=addEnv.vbs     src\${WIMIX_FOLDER}\iser\addEnv.vbs
+	File /oname=remEnv.vbs     src\${WIMIX_FOLDER}\iser\remEnv.vbs
+	File /oname=addLua.vbs     src\${WIMIX_FOLDER}\iser\addLua.vbs
+	File /oname=remLua.vbs     src\${WIMIX_FOLDER}\iser\remLua.vbs
+	File /oname=addReg.vbs     src\${WIMIX_FOLDER}\iser\addReg.vbs
+	File /oname=remReg.vbs     src\${WIMIX_FOLDER}\iser\remReg.vbs
+	File /oname=addPaths.vbs   src\${WIMIX_FOLDER}\iser\addPaths.vbs
+	File /oname=remPaths.vbs   src\${WIMIX_FOLDER}\iser\remPaths.vbs
 	
 	
 	CreateDirectory $INSTDIR\${WIMIX_FOLDER}\rocks
@@ -498,10 +500,10 @@ SectionEnd
 Section /o "-MiWiRocks" SectWiMixRocks
 	; SectionIn RO
 	
-	CreateDirectory $INSTDIR\${WIMIX_FOLDER}\rocks\${WIMIX_FOLDER}
+	CreateDirectory $INSTDIR\${WIMIX_FOLDER}\iser\rocks\
 	
-	SetOutPath $INSTDIR\${WIMIX_FOLDER}\rocks\${WIMIX_FOLDER}
-	File /r src\${WIMIX_FOLDER}\rocks\${WIMIX_FOLDER}\*
+	SetOutPath "$INSTDIR\${WIMIX_FOLDER}\iser\rocks\"
+	File /r src\${WIMIX_FOLDER}\iser\rocks\*
 	
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}
 	File /oname=luarocks.cmd       src\${WIMIX_FOLDER}\arc\luarocks.cmd
@@ -664,7 +666,7 @@ Function .onInit
 	StrCpy $Language ${LANG_ENGLISH}
 	; !insertmacro UMUI_MULTILANG_GET
     !insertmacro MUI_LANGDLL_DISPLAY
-	StrCpy $Bits "32" ; we currently only support 32 bits :P
+	; StrCpy $Bits "32" ; we currently only support 32 bits :P
 	
 	; check if installing is ok...
 	; check for mingw32?
@@ -829,19 +831,19 @@ LangString DESC_SectDef52    ${LANG_ENGLISH} "Set Lua 5.2 as default Lua version
 LangString DESC_SectDef53    ${LANG_ENGLISH} "Set Lua 5.3 as default Lua version"
 LangString DESC_SectPath     ${LANG_ENGLISH} "Adds LuaWiMix to the environment-variable Path. This way you will be able to call it in the commandline (cmd.exe)"
 
-LangString DESC_SectLua      ${LANG_GERMAN} "WÃ¤hle die zu installierenden Lua-Versionen aus (Die standard-Version muss installiert werden)"
+LangString DESC_SectLua      ${LANG_GERMAN} "Wähle die zu installierenden Lua-Versionen aus (Die standard-Version muss installiert werden)"
 LangString DESC_SectLua51    ${LANG_GERMAN} "Lua Version 5.1"
 LangString DESC_SectLua52    ${LANG_GERMAN} "Lua Version 5.2"
 LangString DESC_SectLua53    ${LANG_GERMAN} "Lua Version 5.3"
-LangString DESC_SectRocks    ${LANG_GERMAN} "WÃ¤hle aus, welche Lua Version(en) eine LuaRocks installation erhalten sollen (optional)"
-LangString DESC_SectRocks51  ${LANG_GERMAN} "LuaRocks fÃ¼r Lua version 5.1"
-LangString DESC_SectRocks52  ${LANG_GERMAN} "LuaRocks fÃ¼r Lua version 5.2"
-LangString DESC_SectRocks53  ${LANG_GERMAN} "LuaRocks fÃ¼r Lua version 5.3"
-LangString DESC_SectDef      ${LANG_GERMAN} "WÃ¤hle die Standard Lua-Version aus (pflicht)"
+LangString DESC_SectRocks    ${LANG_GERMAN} "Wähle aus, welche Lua Version(en) eine LuaRocks installation erhalten sollen (optional)"
+LangString DESC_SectRocks51  ${LANG_GERMAN} "LuaRocks für Lua version 5.1"
+LangString DESC_SectRocks52  ${LANG_GERMAN} "LuaRocks für Lua version 5.2"
+LangString DESC_SectRocks53  ${LANG_GERMAN} "LuaRocks für Lua version 5.3"
+LangString DESC_SectDef      ${LANG_GERMAN} "Wähle die Standard Lua-Version aus (pflicht)"
 LangString DESC_SectDef51    ${LANG_GERMAN} "Setzt Lua 5.1 als Standardversion fest"
 LangString DESC_SectDef52    ${LANG_GERMAN} "Setzt Lua 5.2 als Standardversion fest"
 LangString DESC_SectDef53    ${LANG_GERMAN} "Setzt Lua 5.3 als Standardversion fest"
-LangString DESC_SectPath     ${LANG_GERMAN} "FÃ¼gt LuaWiMix der Umgebungsvariable Path an. Auf diese Weise kann lua (und luarocks) in der Kommandozeile (cmd.exe) genutzt werden."
+LangString DESC_SectPath     ${LANG_GERMAN} "Fügt LuaWiMix der Umgebungsvariable Path an. Auf diese Weise kann lua (und luarocks) in der Kommandozeile (cmd.exe) genutzt werden."
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 	!insertmacro MUI_DESCRIPTION_TEXT ${SectLua51}   $(DESC_SectLua51)
