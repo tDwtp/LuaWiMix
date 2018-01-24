@@ -1,22 +1,7 @@
-@ECHO OFF
-GOTO HANDLE
-
-:APPEND_PATH
-FOR %%# IN (%~n0%1.exe) DO IF NOT "%%~$PATH:#" == "" GOTO END
-PUSHD .
-CD /D "%~dp0\..\%1"
-SET "Path=%Path%;%CD%"
-POPD
-GOTO END
-
-:HANDLE
-IF NOT EXIST "%~dp0\..\%1\%~n0%1.exe" GOTO USEDEFAULT
-CALL :APPEND_PATH %1
-%~n0%*
-GOTO END
-
-:USEDEFAULT
-CALL :APPEND_PATH %1
-%~n053 %*
-
-:END
+@SETLOCAL
+@FOR /F "TOKENS=1 USEBACKQ" %%# IN (`CSCRIPT //NOLOGO %~dps0\wimix\iser\findVer.vbs %*`) DO @SET "LUA_PROFILE=%%#"
+@IF "%LUA_PROFILE%" == "%1" (
+	@ENDLOCAL & @%~dps0\%~1\%~n0%*
+) ELSE (
+	@ENDLOCAL & @%~dps0\%LUA_PROFILE%\%~n0%LUA_PROFILE% %*
+)
