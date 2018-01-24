@@ -6,75 +6,34 @@
 ; -----------------------------------------------------------------------------
 
 !macro AddToEnvironment var_name var_value
-	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\" $\"${var_value}$\""
+	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addAnyEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\" $\"${var_value}$\""
 !macroend
 !macro RemoveFromEnvironment var_name
 	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\remEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${var_name}$\""
 !macroend
 
+!macro VBS_AddLua major minor
+	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addLua.vbs$\" //E:VBScript //B //NOLOGO $\"${major}$\" $\"${minor}$\""
+!macroend
+!macro VBS_AddEnv major minor
+	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${major}$\" $\"${minor}$\""
+!macroend
+!macro VBS_AddReg major minor
+	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addReg.vbs$\" //E:VBScript //B //NOLOGO $\"${major}$\" $\"${minor}$\""
+!macroend
 
-!define OldVersion51
+!macro VBS_AddAll major minor
+	!insertmacro VBS_AddLua  "${major}" "${minor}"
+	!insertmacro VBS_AddEnv  "${major}" "${minor}"
+	!insertmacro VBS_AddReg  "${major}" "${minor}"
+!macroend
+
+; !define OldVersion51
 !macro InstallSectLua major minor old
 	Section /o "${major}.${minor}" "SectLua${major}${minor}"
 		SetOutPath "$INSTDIR\${major}${minor}"
 		
-		CreateDirectory "$INSTDIR\${major}${minor}\clibs"
-		CreateDirectory "$INSTDIR\${major}${minor}\lua"
-		CreateDirectory "$INSTDIR\${major}${minor}\include"
-		CreateDirectory "$INSTDIR\${major}${minor}\lib"
-		CreateDirectory "$INSTDIR\${major}${minor}\docs"
-		CreateDirectory "$INSTDIR\${major}${minor}\example"
-		
-		File /oname=lua${major}${minor}.exe   "..\src\${major}${minor}\lua${major}${minor}.exe"
-		File /oname=luac${major}${minor}.exe  "..\src\${major}${minor}\luac${major}${minor}.exe"
-		File /oname=wlua${major}${minor}.exe  "..\src\${major}${minor}\wlua${major}${minor}.exe"
-		File /oname=lua${major}${minor}.dll   "..\src\${major}${minor}\lua${major}${minor}.dll"
-		File /oname=ilua${major}${minor}.bat  "..\src\wimix\arc\ilua.bat"
-		
-		File /oname=lua\ilua.lua       "..\src\${major}${minor}\lua\ilua.lua"
-		File /oname=include\lauxlib.h  "..\src\${major}${minor}\include\lauxlib.h"
-		File /oname=include\lua.h      "..\src\${major}${minor}\include\lua.h"
-		File /oname=include\lua.hpp    "..\src\${major}${minor}\include\lua.hpp"
-		File /oname=include\luaconf.h  "..\src\${major}${minor}\include\luaconf.h"
-		File /oname=include\lualib.h   "..\src\${major}${minor}\include\lualib.h"
-		File /oname=lib\liblua${major}${minor}.a     "..\src\${major}${minor}\lib\liblua${major}${minor}.a"
-		File /oname=lib\liblua${major}${minor}.dll   "..\src\${major}${minor}\lib\lua${major}${minor}.dll"
-		
-		!ifdef OldVersion${major}${minor}
-			File /oname=lua${major}.${minor}.dll          "src\${major}${minor}\lua${major}.${minor}.dll"
-			File /oname=lib\liblua${major}.${minor}.a     "src\${major}${minor}\lib\liblua${major}.${minor}.a"
-			File /oname=lib\liblua${major}.${minor}.dll   "src\${major}${minor}\lib\lua${major}.${minor}.dll"
-		!endif
-		
-			WriteRegStr HKCR ".lua${major}${minor}"  "" "Lua${major}${minor}.Script"
-			WriteRegStr HKCR ".wlua${major}${minor}" "" "wLua${major}${minor}.Script"
-			WriteRegStr HKCR ".luac${major}${minor}" "" "Lua${major}${minor}.Compiled"
-			WriteRegStr HKCR  ".lua${major}${minor}\ContentType"   "" "text/plain"
-			WriteRegStr HKCR  ".lua${major}${minor}\PerceivedType" "" "text"
-			WriteRegStr HKCR ".wlua${major}${minor}\ContentType"   "" "text/plain"
-			WriteRegStr HKCR ".wlua${major}${minor}\PerceivedType" "" "text"
-			
-			WriteRegStr HKCR "Lua${major}${minor}.Compiled" "" "Lua ${major}.${minor} compiled Script"
-			WriteRegStr HKCR  "wLua${major}${minor}.Script" "" "Lua ${major}.${minor} promptless Script File"
-			WriteRegStr HKCR   "Lua${major}${minor}.Script" "" "Lua ${major}.${minor} Script File"
-			WriteRegExpandStr HKCR   "Lua${major}${minor}.Script\Shell\Open\Command" "" "$\"$INSTDIR\${major}${minor}\lua${major}${minor}.exe$\" $\"%1$\" %*"
-			WriteRegExpandStr HKCR  "wLua${major}${minor}.Script\Shell\Open\Command" "" "$\"$INSTDIR\${major}${minor}\wlua${major}${minor}.exe$\" $\"%1$\" %*"
-			WriteRegExpandStr HKCR "Lua${major}${minor}.Compiled\Shell\Open\Command" "" "$\"$INSTDIR\${major}${minor}\luac${major}${minor}.exe$\" $\"%1$\" %*"
-			WriteRegStr HKCR "Lua${major}${minor}.Compiled\DefaultIcon" "" "$INSTDIR\${WIMIX_FOLDER}\icon\luac-file.ico"
-			WriteRegStr HKCR  "wLua${major}${minor}.Script\DefaultIcon" "" "$INSTDIR\${WIMIX_FOLDER}\icon\lua-file.ico"
-			WriteRegStr HKCR   "Lua${major}${minor}.Script\DefaultIcon" "" "$INSTDIR\${WIMIX_FOLDER}\icon\lua-file.ico"
-			WriteRegExpandStr HKCR  "Lua${major}${minor}.Script\Shell\Edit\Command"  "" "$\"$INSTDIR\${WIMIX_FOLDER}\SciTE\SciTE.exe$\" $\"%1$\""
-			WriteRegExpandStr HKCR "wLua${major}${minor}.Script\Shell\Edit\Command" "" "$\"$INSTDIR\${WIMIX_FOLDER}\SciTE\SciTE.exe$\" $\"%1$\""
-			
-			!insertmacro AddToEnvironment "LUA_DEV_${major}_${minor}" "$INSTDIR\${major}${minor}"
-		
-		!ifdef OldVersion${major}${minor}
-			!insertmacro AddToEnvironment "LUA_CPATH" ".\?.dll;.\?${major}${minor}.dll;$INSTDIR\${major}${minor}\?.dll;$INSTDIR\${major}${minor}\?${major}${minor}.dll;$INSTDIR\${major}${minor}\clibs\?.dll;$INSTDIR\${major}${minor}\clibs\?${major}${minor}.dll;$INSTDIR\${major}${minor}\loadall.dll;$INSTDIR\${major}${minor}\clibs\loadall.dll"
-			!insertmacro AddToEnvironment "LUA_PATH"  ".\?.lua;.\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.lua;$INSTDIR\${major}${minor}\lua\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?\init.lua;$INSTDIR\${major}${minor}\lua\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\?.lua;$INSTDIR\${major}${minor}\?.lua${major}${minor};$INSTDIR\${major}${minor}\?\init.lua;$INSTDIR\${major}${minor}\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.luac$INSTDIR\${major}${minor}\lua\?.luac${major}${minor}"
-		!else
-			!insertmacro AddToEnvironment "LUA_CPATH_${major}_${minor}" ".\?.dll;.\?${major}${minor}.dll;$INSTDIR\${major}${minor}\?.dll;$INSTDIR\${major}${minor}\?${major}${minor}.dll;$INSTDIR\${major}${minor}\clibs\?.dll;$INSTDIR\${major}${minor}\clibs\?${major}${minor}.dll;$INSTDIR\${major}${minor}\loadall.dll;$INSTDIR\${major}${minor}\clibs\loadall.dll"
-			!insertmacro AddToEnvironment "LUA_PATH_${major}_${minor}"  ".\?.lua;.\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.lua;$INSTDIR\${major}${minor}\lua\?.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?\init.lua;$INSTDIR\${major}${minor}\lua\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\?.lua;$INSTDIR\${major}${minor}\?.lua${major}${minor};$INSTDIR\${major}${minor}\?\init.lua;$INSTDIR\${major}${minor}\?\init.lua${major}${minor};$INSTDIR\${major}${minor}\lua\?.luac$INSTDIR\${major}${minor}\lua\?.luac${major}${minor}"
-		!endif
+		!insertmacro VBS_AddAll ${major} ${minor}
 		
 		StrCmp ${minor} "3" 0 NotMinimal
 			SectionIn 1 2
@@ -86,29 +45,7 @@
 		Section /o "${major}.${minor}" SectRocks${major}${minor}
 			; SetOutPath $INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}
 			
-			Push $0
-			; Push $1
-			FileOpen $0 "$PLUGINSDIR\instrocks${major}${minor}.cmd" w
-			FileSeek $0 0 SET
-			FileWrite $0 "@ECHO OFF$\r$\n"
-			; FileWrite $0 "ECHO.Start Installation$\r$\n"
-			FileWrite $0 "PUSHD $\"$INSTDIR\${WIMIX_FOLDER}\iser\rocks$\"$\r$\n"
-			FileWrite $0 "$\"$INSTDIR\${WIMIX_FOLDER}\iser\rocks\win32\lua5.1\bin\lua5.1.exe$\" "
-			FileWrite $0 "$\"$INSTDIR\${WIMIX_FOLDER}\iser\rocks\install.bat$\" "
-			FileWrite $0 "/P $\"$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}$\" "
-			FileWrite $0 "/TREE $\"$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\tree$\" "
-			FileWrite $0 "/CMOD $\"$INSTDIR\${major}${minor}\clibs$\" "
-			FileWrite $0 "/LUAMOD $\"$INSTDIR\${major}${minor}\lua$\" "
-			FileWrite $0 "/LV ${major}.${minor} /LUA $\"$INSTDIR\${major}${minor}\$\" /MW /NOREG /Q"
-			FileWrite $0 "$\r$\n"
-			FileWrite $0 "POPD$\r$\n"
-			; FileWrite $0 "PAUSE$\r$\n"
-			FileClose $0
-			ExecWait "$PLUGINSDIR\instrocks${major}${minor}.cmd"
-			; ExecWait "$\"$INSTDIR\${WIMIX_FOLDER}\install\win32\lua5.1\bin\lua5.1.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\install\install.bat$\" /P $\"$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}$\" /TREE $\"$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\tree$\" /CMOD $\"$INSTDIR\${major}${minor}\clibs$\" /LUAMOD $\"$INSTDIR\${major}${minor}\lua$\" /LV ${major}.${minor} /LUA $\"$INSTDIR\${major}${minor}\$\" /MW /NOREG /Q"
-			Delete "$PLUGINSDIR\instrocks${major}${minor}.cmd"
-			; Pop $1
-			Pop $0
+			Exec "$INSTDIR\${WIMIX_FOLDER}\lua-wimix.bat ${major}${minor} ROCKS"
 			
 			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks${major}${minor}.bat"
 			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks-admin.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks-admin${major}${minor}.bat"
@@ -172,7 +109,6 @@ Section ""
 	SectionIn RO
 	SetOutPath $INSTDIR
 	
-	
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}
 	
 	;; wimix
@@ -180,6 +116,7 @@ Section ""
 	File /oname=wlua.cmd            ..\src\${WIMIX_FOLDER}\wlua.cmd
 	File /oname=luac.cmd            ..\src\${WIMIX_FOLDER}\luac.cmd
 	File /oname=ilua.cmd            ..\src\${WIMIX_FOLDER}\ilua.cmd
+	File /oname=lua-wimix.cmd       ..\src\${WIMIX_FOLDER}\lua-wimix.cmd
 	
 	;; wimix\icon
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}\icon
@@ -192,19 +129,24 @@ Section ""
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}\arc
 	StrCmp $Bits "32" 0 +7
 	# then ; 32
-		File /oname=lua51x86.zip    ..\src\${WIMIX_FOLDER}\arc\lua51x86.zip
-		File /oname=lua52x86.zip    ..\src\${WIMIX_FOLDER}\arc\lua52x86.zip
-		File /oname=lua53x86.zip    ..\src\${WIMIX_FOLDER}\arc\lua53x86.zip
+		File /oname=lua51.zip       ..\src\${WIMIX_FOLDER}\arc\lua51x86.zip
+		File /oname=lua52.zip       ..\src\${WIMIX_FOLDER}\arc\lua52x86.zip
+		File /oname=lua53.zip       ..\src\${WIMIX_FOLDER}\arc\lua53x86.zip
 	# end
 	StrCmp $Bits "64" 0 +7
 	# then ; 64
-		File /oname=lua51amd64.zip  ..\src\${WIMIX_FOLDER}\arc\lua51amd64.zip
-		File /oname=lua52amd64.zip  ..\src\${WIMIX_FOLDER}\arc\lua52amd64.zip
-		File /oname=lua53amd64.zip  ..\src\${WIMIX_FOLDER}\arc\lua53amd64.zip
+		File /oname=lua51.zip       ..\src\${WIMIX_FOLDER}\arc\lua51amd64.zip
+		File /oname=lua52.zip       ..\src\${WIMIX_FOLDER}\arc\lua52amd64.zip
+		File /oname=lua53.zip       ..\src\${WIMIX_FOLDER}\arc\lua53amd64.zip
 	# end
 	File /oname=luarocks.cmd        ..\src\${WIMIX_FOLDER}\arc\luarocks.cmd
 	File /oname=luarocks-admin.cmd  ..\src\${WIMIX_FOLDER}\arc\luarocks-admin.cmd
 	File /oname=luarocksw.cmd       ..\src\${WIMIX_FOLDER}\arc\luarocksw.cmd
+	File /oname=lua.cmd             ..\src\${WIMIX_FOLDER}\arc\lua.cmd
+	File /oname=wlua.cmd            ..\src\${WIMIX_FOLDER}\arc\wlua.cmd
+	File /oname=luac.cmd            ..\src\${WIMIX_FOLDER}\arc\luac.cmd
+	File /oname=ilua.cmd            ..\src\${WIMIX_FOLDER}\arc\ilua.cmd
+	File /oname=iluaXX.cmd          ..\src\${WIMIX_FOLDER}\arc\iluaXX.cmd
 	
 	;; wimix\iser
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}\iser
@@ -220,6 +162,7 @@ Section ""
 	File /oname=remPaths.vbs        ..\src\${WIMIX_FOLDER}\iser\remPaths.vbs
 	File /oname=remReg.vbs          ..\src\${WIMIX_FOLDER}\iser\remReg.vbs
 	
+	File /oname=dummyVer.vbs        ..\src\${WIMIX_FOLDER}\iser\dummyVer.vbs
 	File /oname=findVer.vbs         ..\src\${WIMIX_FOLDER}\iser\findVer.vbs
 	File /oname=setDefault.vbs      ..\src\${WIMIX_FOLDER}\iser\setDefault.vbs
 	
@@ -251,8 +194,8 @@ Section ""
 		WriteRegExpandStr HKCR  "Lua.Script\Shell\Edit\Command" "" "$\"$INSTDIR\${WIMIX_FOLDER}\SciTE\SciTE.exe$\" $\"%1$\""
 		WriteRegExpandStr HKCR "wLua.Script\Shell\Edit\Command" "" "$\"$INSTDIR\${WIMIX_FOLDER}\SciTE\SciTE.exe$\" $\"%1$\""
 		
-		!insertmacro AddToEnvironment "LUA_MIWI" "$INSTDIR"
-		!insertmacro AddToEnvironment "LUA_DEV" "$INSTDIR\$DepDef"
+		!insertmacro AddToEnvironment "LUA_WIMIX" "$INSTDIR"
+		; !insertmacro AddToEnvironment "LUA_DEV" "$INSTDIR\$DepDef"
 	
 	WriteUninstaller $INSTDIR\uninstall.exe
 	
@@ -271,60 +214,26 @@ Section ""
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "URLUpdateInfo" "https://github.com/tDwtp/LuaWiMix/releases/latest"
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "URLInfoAbout" "https://github.com/tDwtp/LuaWiMix/blob/master/README.md"
 	
-	
-	
 SectionEnd
 
-Section "DummyA"
-SectionEnd
-Section "DummyB"
-SectionEnd
-Section "DummyC"
-SectionEnd
-Section "DummyD"
-SectionEnd
-Section "DummyE"
-SectionEnd
-Section "DummyF"
-SectionEnd
-Section "DummyG"
-SectionEnd
-Section "DummyH"
-SectionEnd
-Section "DummyI"
-SectionEnd
-Section "DummyJ"
-SectionEnd
-Section "DummyK"
-SectionEnd
-Section "DummyL"
-SectionEnd
-Section "DummyM"
-SectionEnd
-Section "DummyN"
-SectionEnd
-Section "DummyO"
-SectionEnd
-Section "DummyP"
-SectionEnd
-Section "DummyQ"
-SectionEnd
-Section "DummyS"
-SectionEnd
-Section "DummyT"
-SectionEnd
-Section "DummyU"
-SectionEnd
-Section "DummyV"
-SectionEnd
-Section "DummyW"
-SectionEnd
-Section "DummyX"
-SectionEnd
-Section "DummyY"
-SectionEnd
-Section "DummyZ"
-SectionEnd
+SectionGroup /e "Lua" SectLua
+	!insertmacro InstallSectLua 5 1 "true"
+	!insertmacro InstallSectLua 5 2 "false"
+	!insertmacro InstallSectLua 5 3 "false"
+SectionGroupEnd
+
+SectionGroup /e "LuaRocks" SectLuaRocks
+	!insertmacro InstallSectLuaRocks 5 1
+	!insertmacro InstallSectLuaRocks 5 2
+	!insertmacro InstallSectLuaRocks 5 3
+SectionGroupEnd
+
+SectionGroup /e "Default" SectDef
+	!insertmacro InstallSectDefault 5 1
+	!insertmacro InstallSectDefault 5 2
+	!insertmacro InstallSectDefault 5 3
+SectionGroupEnd
+
 
 Function ".onInit"
 	; default language english:
