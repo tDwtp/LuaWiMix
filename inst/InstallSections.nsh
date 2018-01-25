@@ -70,7 +70,7 @@ InstType "$(UMUI_TEXT_SETUPTYPE_COMPLETE_TITLE)"
 ; - Install Sections -
 ; - ---------------- -
 ; !define OldVersion51
-!macro InstallSectLua major minor old
+!macro InstallSectLua major minor
 	Section /o "${major}.${minor}" "SectLua${major}${minor}"
 		SetOutPath "$INSTDIR\${major}${minor}"
 		
