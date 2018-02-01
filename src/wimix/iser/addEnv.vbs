@@ -4,7 +4,7 @@ If WScript.Arguments.Count <> 2 Then
 	WScript.Quit(1)
 End If
 
-Dim objFso, objEnv, objShl
+Dim objFso
 Dim instDir
 Dim major, minor
 
@@ -40,7 +40,10 @@ If Not objFso.FileExists(instDir & "\" & major & minor & "\luac" & major & minor
 End If
 
 
-Dim suffix
+Dim objEnv, objShl
+Dim envLoc, suffix
+Dim luaDev, luaCPath, luaPath
+
 If major = 5 And minor = 1 Then
 	suffix = ""
 Else
@@ -48,9 +51,10 @@ Else
 End If
 
 Set objShl = CreateObject("WScript.Shell")
-objEnv = objShl.Environment("SYSTEM")
-objEnv("LUA_DEV_" & major & "_" & minor) = instDir & "\" & major & minor
-objEnv("LUA_CPATH" & suffix) = _
+envLoc = "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\"
+
+luaDev = instDir & "\" & major & minor
+luaCPath = _
 	".\?.dll;" & _
 	".\?" & major & minor & ".dll;" & _
 	instDir & "\" & major & minor & "\clibs\?.dll;" & _
@@ -59,7 +63,7 @@ objEnv("LUA_CPATH" & suffix) = _
 	instDir & "\" & major & minor & "\clibs\loadall.dll" ' & _
 	' instDir & "\" & major & minor & "\?.dll;" & _
 	' instDir & "\" & major & minor & "\?" & major & minor & ".dll;" & _
-objEnv("LUA_PATH" & suffix) = _
+luaPath = _
 	".\?.lua;" & _
 	".\?.lua" & major & minor & ";" & _
 	".\?\init.lua;" & _
@@ -74,3 +78,13 @@ objEnv("LUA_PATH" & suffix) = _
 	' instDir & "\" & major & minor & "\?.lua" & major & minor & ";" & _
 	' instDir & "\" & major & minor & "\?\init.lua;" & _
 	' instDir & "\" & major & minor & "\?\init.lua" & major & minor & ";" & _
+
+objShl.RegWrite envLoc & "LUA_DEV_" & major & "_" & minor, luaDev, "REG_SZ"
+objShl.RegWrite envLoc & "LUA_CPATH" & suffix, luaCPath, "REG_SZ"
+objShl.RegWrite envLoc & "LUA_PATH" & suffix, luaPath, "REG_SZ"
+
+' read the values to update the environment properly
+Set objEnv = objShl.Environment("System")
+objEnv("LUA_DEV_" & major & "_" & minor) = luaDev
+objEnv("LUA_CPATH" & suffix) = luaCPath
+objEnv("LUA_PATH"  & suffix) = luaPath

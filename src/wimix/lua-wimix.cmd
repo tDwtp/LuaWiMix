@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL
-NET SESSION >NUL 2>&1
-IF ERRORLEVEL 1 GOTO REQUEST_ADMIN
+CALL :TEST_ADMIN
+IF ERRORLEVEL 1 IF NOT "%~2" == "CHECK" GOTO REQUEST_ADMIN
 
 SET "NO_USAGE="
 REM IF "%~1" == "HELP" SET "USAGE=%~1"
@@ -20,21 +20,24 @@ IF /I "%1" == "--help" GOTO USAGE
 ENDLOCAL
 GOTO END
 
+
+
+
 REM DO :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :DO_51
 SET "LV=51"
-GOTO CHECK_DO
+GOTO DO_
 :DO_52
 SET "LV=52"
-GOTO CHECK_DO
+GOTO DO_
 :DO_53
 SET "LV=53"
-GOTO CHECK_DO
+GOTO DO_
 
 
-:CHECK_DO
-FOR %%C IN (ADD REMOVE DEFAULT) DO IF /I "%1" == "%%C" CALL :DO_%*
+:DO_
+FOR %%C IN (ADD REMOVE DEFAULT CHECK) DO IF /I "%1" == "%%C" CALL :DO_%*
 GOTO END
 
 
@@ -59,12 +62,14 @@ CALL :REMOVE_LUA
 GOTO END
 
 
+
+
 REM ADD ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :ADD_LUA
-CALL :CHECK_ADMIN
+CALL :TEST_ADMIN
 IF ERRORLEVEL 1 GOTO :ERROR_NO_ADMIN
-CALL :CHECK_LUA
+CALL :TEST_LUA
 IF NOT ERRORLEVEL 1 GOTO :ADD_LUA_VALID
 
 CALL :REMOVE_LUA
@@ -103,7 +108,7 @@ GOTO END
 
 
 :ADD_ROCKS
-CALL :CHECK_LUA
+CALL :TEST_LUA
 IF NOT ERRORLEVEL 1 GOTO ADD_ROCKS_HAVELUA
 IF ERRORLEVEL 2 GOTO ADD_ROCKS_FAILED_INVALIDLUA
 CALL :ADD_LUA
@@ -124,16 +129,15 @@ IF NOT ERRORLEVEL 2 ECHO.Lua %LV:~0,1%.%LV:~-1% is an invalid installation.
 GOTO END
 
 
+
+
 REM REMOVE :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :REMOVE_LUA
-CALL :CHECK_ADMIN
+CALL :TEST_ADMIN
 IF ERRORLEVEL 1 GOTO :ERROR_NO_ADMIN
 
-PUSHD .
-CD /D "%~dp0\..\%LV%"
-%~dps0\iser\addPaths.vbs "%CD%"
-POPD
+FOR /F %%# IN ('%~dp0\iser\findVer.vbs') IF "%%#" == "%LV%" GOTO REMOVE_LUA_FAILED_VERSIONISDEFAULT
 
 %~dp0\iser\remReg.vbs %LV:~0,1% %LV:~-1%
 IF ERRORLEVEL 1 CALL :REMOVE_LUA_FAILED_REGISTRY
@@ -142,17 +146,29 @@ IF ERRORLEVEL 1 CALL :REMOVE_LUA_FAILED_REGISTRY
 IF ERRORLEVEL 1 CALL :ADD_LUA_FAILED_ENVIRONMENT
 
 
-CALL :CHECK_LUA
-IF NOT ERRORLEVEL 1 GOTO :REMOVE_LUA_STEP
-IF NOT ERRORLEVEL 2 GOTO :REMOVE_LUA_NOLUA
+CALL :TEST_LUA
+IF NOT ERRORLEVEL 1 GOTO REMOVE_LUA_STEP
+IF NOT ERRORLEVEL 2 GOTO REMOVE_LUA_FAILED_NOLUA
 :REMOVE_LUA_STEP
+PUSHD .
+	CD /D "%~dp0\..\%LV%"
+	%~dps0\iser\remPaths.vbs "%CD%"
+POPD
+
 %~dp0\iser\remLua.vbs %LV:~0,1% %LV:~-1%
-IF ERRORLEVEL 1 GOTO :ADD_LUA_FAILED_REMOVING
+IF ERRORLEVEL 1 GOTO ADD_LUA_FAILED_REMOVING
 
 IF EXIST %~dp0\..\%LV% RMDIR /S /Q %~dp0\..\%LV%
 
 GOTO END
 
+:REMOVE_LUA_FAILED_VERSIONISDEFAULT
+ECHO.Version %LV:~0,1%.%LV:~-1% cant be removed. It is set as default.
+ECHO.Set another version as default to be able to remove this version.
+EXIT /B 1
+:REMOVE_LUA_FAILED_NOLUA
+ECHO.Lua %LV:~0,1%.%LV:~-1% already removed.
+GOTO END
 :REMOVE_LUA_FAILED_REMOVING
 ECHO.Error while removing Lua files and directories.
 EXIT /B 1
@@ -170,11 +186,78 @@ ECHO."%~n0 %LV% CHECK".
 GOTO END
 
 
+
+:REMOVE_ROCKS
+CALL :TEST_ADMIN
+IF ERRORLEVEL 1 GOTO :ERROR_NO_ADMIN
+
+
+GOTO END
+
+
 REM CHECK ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-:CHECK_LUA
+:DO_CHECK
+ECHO.Errors (for Lua %LV:~0,1%.%LV:~-1%):
 PUSHD .
-CD /C %~dp0\..\
+CD /D %~dp0\..\
+IF NOT EXIST %LV% (
+	ECHO.No directory found for Lua version %LV~0,1%.%LV:~-1%
+	POPD
+	GOTO DO_CHECK_ENTRIES
+)
+CD %LV%
+SET "INST_PATH=%CD%"
+IF "%INST_PATH:~-1%" == "\" SET "INST_PATH=%CD%\"
+POPD
+
+FOR %%N IN (lib include lua clibs) DO IF NOT EXIST %INST_PATH%\%%N ECHO.missing folder "%%N"
+FOR %%N IN (lua%LV%.exe wlua%LV%.exe luac%LV%.exe lib\lua%LV%.dll lib\liblua%LV%.a include\lauxlib.h include\lua.h include\lua.hpp include\lualib.h include\luaconf.h) DO IF NOT EXIST %INST_PATH%\%%N ECHO.missing file "%%N"
+
+:DO_CHECK_ENTRIES
+FOR %%# IN (".lua%LV% Lua%LV%.Script" ".luac%LV% Lua%LV%.Compiled" ".wlua%LV% wLua%LV%.Script") DO CALL :DO_CHECK_ASSOC %%~# "%%B" "%%C"
+CALL :DO_CHECK_REG Lua%LV%.Script lua
+CALL :DO_CHECK_REG Lua%LV%.Compiled luac
+CALL :DO_CHECK_REG wLua%LV%.Script wlua
+
+SET SUFFIX=_%LV:~0,1%_%LV:~-1%
+IF %LV:~-1% == 1 SET SUFFIX=
+IF NOT DEFINED LUA_CPATH%SUFFIX% ECHO.LUA_CPATH%SUFFIX% is not set
+IF NOT DEFINED LUA_PATH%SUFFIX%  ECHO.LUA_PATH%SUFFIX% is not set
+IF NOT DEFINED LUA_DEV_%LV:~0,1%_%LV:~-1% ECHO.LUA_DEV_%LV:~0,1%_%LV:~-1% is not set
+GOTO END
+
+:DO_CHECK_REG
+REG QUERY HKCR\%1 1>NUL 2>&1
+IF ERRORLEVEL 1 ECHO.no file-type entry for %1
+REG QUERY HKCR\%1\DefaultIcon 1>NUL 2>&1
+IF ERRORLEVEL 1 ECHO.no icon entry for %1
+IF NOT ERRORLEVEL 1 FOR /F "SKIP=2 TOKENS=1,2,*" %%A IN ('REG QUERY HKCR\%1\DefaultIcon /ve') DO IF /I NOT "%%C" == "%~dp0icon\%2-file.ico" ECHO.invalid icon-location for %1
+REG QUERY HKCR\%1\Shell\Open\Command 1>NUL 2>&1
+IF ERRORLEVEL 1 ECHO.no open entry for %1
+IF NOT ERRORLEVEL 1 FOR /F "SKIP=2 TOKENS=1,2,*" %%A IN ('REG QUERY HKCR\%1\Shell\Open\Command /ve') DO IF /I NOT "%%C" == ""%INST_PATH%\%2%LV%.exe" "%%1" %%*" ECHO.invalid open-command for %1
+IF "%2" == "luac" GOTO END
+REG QUERY HKCR\%1\Shell\Edit\Command 1>NUL 2>&1
+IF NOT ERRORLEVEL 1 FOR /F "SKIP=2 TOKENS=1,2,*" %%A IN ('REG QUERY HKCR\%1\Shell\Edit\Command /ve') DO IF /I NOT "%%C" == ""%~dp0SciTE\SciTE.exe" "%%1"" ECHO.invalid edit-command for %1
+IF ERRORLEVEL 1 ECHO.no edit entry for %1
+GOTO END
+
+:DO_CHECK_ASSOC
+FOR /F "SKIP=2 TOKENS=1,2,*" %%A IN ('REG QUERY HKCR\%1 /ve') DO CALL :DO_CHECK_ASSOC_VALUES %1 %2 "%%B" "%%C"
+GOTO END
+:DO_CHECK_ASSOC_VALUES
+IF NOT "%~3" == "REG_SZ" ECHO.invalid type for association "%~1"
+IF NOT "%~4" == "%~2" ECHO.invalid association "%~1" ("%~2" excpected, got "%~4")
+GOTO END
+
+
+
+
+REM TEST :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:TEST_LUA
+PUSHD .
+CD /D %~dp0\..\
 IF NOT EXIST %LV% POPD & EXIT /B 1
 CD %LV%
 SET "INST_PATH=%CD%"
@@ -185,10 +268,10 @@ IF NOT EXIST %INST_PATH%\lua%LV%.exe EXIT /B 2
 IF NOT EXIST %INST_PATH%\wlua%LV%.exe EXIT /B 3
 IF NOT EXIST %INST_PATH%\luac%LV%.exe EXIT /B 4
 IF NOT EXIST %INST_PATH%\lib EXIT /B 5
-IF NOT EXIST %INST_PATH%\lib\lib%LV%.dll EXIT /B 6
-IF NOT EXIST %INST_PATH%\lib\lib%LV%.a EXIT /B 7
+IF NOT EXIST %INST_PATH%\lib\lua%LV%.dll EXIT /B 6
+IF NOT EXIST %INST_PATH%\lib\liblua%LV%.a EXIT /B 7
 IF NOT EXIST %INST_PATH%\lua EXIT /B 8
-IF NOT EXIST %INST_PATH%\clibs EXIT /B EXIT /B 9
+IF NOT EXIST %INST_PATH%\clibs EXIT /B 9
 IF NOT EXIST %INST_PATH%\include EXIT /B 10
 IF NOT EXIST %INST_PATH%\include\lauxlib.h EXIT /B 11
 IF NOT EXIST %INST_PATH%\include\lua.h EXIT /B 12
@@ -198,28 +281,34 @@ IF NOT EXIST %INST_PATH%\include\luaconf.h EXIT /B 15
 EXIT /B 0
 
 
-:CHECK_ADMIN
-fsutil file findbysid %USERNAME% %~dp0\arc
+:TEST_ADMIN
+fsutil file findbysid %USERNAME% %~dp0\arc 1>NUL 2>&1
 EXIT /B %ERRORLEVEL%
 
 
 :ERROR_NO_ADMIN
 ECHO.You do not have administrator permissions.
-ECHO.Elevate? (currently not available)
 GOTO END
 
-:DO_REMOVE
-IF /I "%1" == "ROCKS" CALL REMOVE_%*
-IF /I "%1" == "ROCKS" GOTO END
+:REQUEST_ADMIN
+SET "ELEVATE="
+ECHO.Call with administrator rights?
+SET /P "ELEVATE=Any text will cancle the elevation: "
+IF DEFINED ELEVATE EXIT /B 1
 
-CALL :REMOVE_LUA
+:REQUEST_ADMIN_TMP
+SET TF=%TEMP%\lwm-%RANDOM%.bat
+IF EXIST "%TF%" GOTO :REQUEST_ADMIN_TMP
+
+ECHO @ECHO OFF> "%TF%"
+ECHO CHDIR /D "%CD%">> "%TF%"
+ECHO ECHO.%0 %*>> "%TF%"
+ECHO CALL %0 %*>> "%TF%"
+ECHO PAUSE>> "%TF%"
+ECHO DEL "%TF%">> "%TF%"
+
+PowerShell -Command (New-Object -com 'Shell.Application').ShellExecute('%TMPFILE%', '', '', 'runas', 5)
 GOTO END
-
-:REMOVE_ROCKS
-ECHO.Not implemented yet.
-GOTO END
-
-:REMOVE_LUA
 
 
 
@@ -233,7 +322,7 @@ ECHO.^! unknown help-command "%~1".
 
 :USAGE
 IF DEFINED USAGE GOTO USAGE_%USAGE%
-ECHO.Usage: %~n0 ^<Lua-version^> [ADD^|REMOVE^|DEFAULT^|HELP] [ROCKS]
+ECHO.Usage: %~n0 ^<Lua-version^> [ADD^|REMOVE^|DEFAULT^|CHECK^|HELP] [ROCKS]
 ECHO.
 ECHO.  Lua-version   The Lua-version to apply commands to.
 ECHO.
@@ -243,10 +332,13 @@ ECHO.            Lua will be installed silently before its LuaRocks.
 ECHO.  REMOVE    Remove the Lua-version or just its LuaRocks.
 ECHO.            Removing the Lua-version will remove its LuaRocks as well.
 ECHO.  DEFAULT   Set the Lua-version as default.
+ECHO.  CHECK     Print all errors with the installation of the Lua-version.
 ECHO.  HELP      Show this command-description or the one for a specific command.
+ECHO.
 ECHO.
 ECHO.NOTE: All commands (ADD, REMOVE, DEFAULT, CHECK, HELP) are case-insensitive.
 ECHO.      The switch ROCKS is also case-insensitive.
+ECHO.      DEFAULT and CHECK do not care about the ROCKS switch
 ECHO.
 ENDLOCAL
 GOTO END
@@ -293,7 +385,8 @@ GOTO END
 :USAGE_CHECK
 ECHO.Usage: %~n0 [51^|52^|53] CHECK
 ECHO.
-ECHO.  Check the Lua-versions folder for the default/minimal structure
+ECHO.  This command will only display errors!
+ECHO.  It will check the Lua-versions folder for the default/minimal structure
 ECHO.  as well as the registry entries and environment variables.
 ECHO.
 ECHO.NOTE: All commands (ADD, REMOVE, DEFAULT, CHECK, HELP) are case-insensitive.
@@ -307,11 +400,16 @@ ECHO.
 ECHO.  ADD       show the command-description for adding a version.
 ECHO.  REMOVE    show the command-description for removing a version.
 ECHO.  DEFAULT   show the command-description for setting the default version.
+ECHO.  CHECK     show the command-description for checking a version.
 ECHO.  HELP      show this command-description.
 ECHO.
 ECHO.NOTE: All commands (ADD, REMOVE, DEFAULT, CHECK, HELP) are case-insensitive.
 ECHO.
 ENDLOCAL
 GOTO END
+
+:ABORT
+ENDLOCAL
+EXIT /B %1
 
 :END

@@ -47,13 +47,13 @@ InstType "$(UMUI_TEXT_SETUPTYPE_COMPLETE_TITLE)"
 ; - Helper Macros -
 ; - ------------- -
 !macro VBS_addLua major minor
-	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addLua.vbs$\" //E:VBScript //B //NOLOGO $\"${major}$\" $\"${minor}$\""
+	ExecWait "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\iser\addLua.vbs$\" //E:VBScript //B //NOLOGO ${major} ${minor}"
 !macroend
 !macro VBS_addEnv major minor
-	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addEnv.vbs$\" //E:VBScript //B //NOLOGO $\"${major}$\" $\"${minor}$\""
+	ExecWait "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\iser\addEnv.vbs$\" //E:VBScript //NOLOGO ${major} ${minor}"
 !macroend
 !macro VBS_addReg major minor
-	Exec "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\arc\addReg.vbs$\" //E:VBScript //B //NOLOGO $\"${major}$\" $\"${minor}$\""
+	ExecWait "$\"$SYSDIR\WScript.exe$\" $\"$INSTDIR\${WIMIX_FOLDER}\iser\addReg.vbs$\" //E:VBScript //NOLOGO ${major} ${minor}"
 !macroend
 
 !macro VBS_addAll major minor
@@ -72,32 +72,36 @@ InstType "$(UMUI_TEXT_SETUPTYPE_COMPLETE_TITLE)"
 ; !define OldVersion51
 !macro InstallSectLua major minor
 	Section /o "${major}.${minor}" "SectLua${major}${minor}"
-		SetOutPath "$INSTDIR\${major}${minor}"
+		; SetOutPath "$INSTDIR\${major}${minor}"
 		
 		!insertmacro VBS_AddAll ${major} ${minor}
 		
 		StrCmp ${minor} "3" 0 NotMinimal
-			SectionIn 1 2
+			SectionIn 1 2 3
+			Goto Done
 		NotMinimal:
 			SectionIn 3
+		Done:
 	SectionEnd
 !macroend
 !macro InstallSectLuaRocks major minor
 		Section /o "${major}.${minor}" SectRocks${major}${minor}
 			; SetOutPath $INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}
 			
-			Exec "$INSTDIR\${WIMIX_FOLDER}\lua-wimix.bat ${major}${minor} ROCKS"
+			ExecWait "$INSTDIR\${WIMIX_FOLDER}\lua-wimix.bat ${major}${minor} ADD ROCKS"
 			
-			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks${major}${minor}.bat"
-			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks-admin.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks-admin${major}${minor}.bat"
-			CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocksw.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocksw${major}${minor}.bat"
+			; CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks${major}${minor}.bat"
+			; CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks-admin.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocks-admin${major}${minor}.bat"
+			; CopyFiles "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocksw.bat" "$INSTDIR\${WIMIX_FOLDER}\rocks\${major}${minor}\luarocksw${major}${minor}.bat"
 			
 			; File /oname=LuaRocks${major}${minor}.txt dummy.txt
 			
 			StrCmp "${minor}" "3" 0 NotMinimal
-				SectionIn 2
+				SectionIn 2 3
+				Goto Done
 			NotMinimal:
 				SectionIn 3
+			Done:
 		SectionEnd
 !macroend
 !macro InstallSectDefault major minor
@@ -239,9 +243,10 @@ SectionEnd
 
 Section ""
 	SectionIn RO
-	SetOutPath $INSTDIR
+	SectionIn 1 2 3
+	SetOutPath "$INSTDIR"
 	
-	SetOutPath $INSTDIR\${WIMIX_FOLDER}
+	SetOutPath "$INSTDIR\${WIMIX_FOLDER}"
 	
 	;; wimix
 	File /oname=lua.cmd             ..\src\${WIMIX_FOLDER}\lua.cmd
@@ -251,14 +256,15 @@ Section ""
 	File /oname=lua-wimix.cmd       ..\src\${WIMIX_FOLDER}\lua-wimix.cmd
 	
 	;; wimix\icon
-	SetOutPath $INSTDIR\${WIMIX_FOLDER}\icon
+	SetOutPath "$INSTDIR\${WIMIX_FOLDER}\icon"
 	File /oname=lua-logo.ico        ..\src\${WIMIX_FOLDER}\icon\lua-logo.ico
 	File /oname=lua-file.ico        ..\src\${WIMIX_FOLDER}\icon\lua-file.ico
+	File /oname=wlua-file.ico       ..\src\${WIMIX_FOLDER}\icon\lua-file.ico
 	File /oname=luac-file.ico       ..\src\${WIMIX_FOLDER}\icon\luac-file.ico
 	File /oname=luarocks-file.ico   ..\src\${WIMIX_FOLDER}\icon\luarocks-file.ico
 	
 	;; wimix\arc
-	SetOutPath $INSTDIR\${WIMIX_FOLDER}\arc
+	SetOutPath "$INSTDIR\${WIMIX_FOLDER}\arc"
 	StrCmp $Bits "32" 0 Not32
 	# then ; 32
 		File /oname=lua51.zip       ..\src\${WIMIX_FOLDER}\arc\lua51x86.zip
@@ -283,7 +289,7 @@ Section ""
 	File /oname=iluaXX.bat          ..\src\${WIMIX_FOLDER}\arc\iluaXX.bat
 	
 	;; wimix\iser
-	SetOutPath $INSTDIR\${WIMIX_FOLDER}\iser
+	SetOutPath "$INSTDIR\${WIMIX_FOLDER}\iser"
 	File /oname=addAnyEnv.vbs       ..\src\${WIMIX_FOLDER}\iser\addAnyEnv.vbs
 	File /oname=addEnv.vbs          ..\src\${WIMIX_FOLDER}\iser\addEnv.vbs
 	File /oname=addLua.vbs          ..\src\${WIMIX_FOLDER}\iser\addLua.vbs
@@ -301,7 +307,10 @@ Section ""
 	File /oname=setDefault.vbs      ..\src\${WIMIX_FOLDER}\iser\setDefault.vbs
 	File /oname=setDirectDefault.vbs ..\src\${WIMIX_FOLDER}\iser\setDirectDefault.vbs
 	
-	CreateDirectory $INSTDIR\${WIMIX_FOLDER}\rocks
+	SetOutPath "$INSTDIR\${WIMIX_FOLDER}\iser\rocks"
+	File /r ..\src\${WIMIX_FOLDER}\iser\rocks\*
+	
+	CreateDirectory "$INSTDIR\${WIMIX_FOLDER}\rocks"
 	
 	; CreateDirectory $INSTDIR\{MIWI_FOLDER}\SciTE
 	SetOutPath $INSTDIR\${WIMIX_FOLDER}\SciTE
@@ -349,11 +358,12 @@ Section ""
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "URLUpdateInfo" "https://github.com/tDwtp/LuaWiMix/releases/latest"
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "URLInfoAbout" "https://github.com/tDwtp/LuaWiMix/blob/master/README.md"
 	
+	SetOutPath "$INSTDIR\${WIMIX_FOLDER}"
 SectionEnd
 
 
 Section "Add WiMix to Path" SectPath
-	!insertmacro AddToPath "$INSTDIR\${WIMIX_FOLDER}"
+	; !insertmacro AddToPath "$INSTDIR\${WIMIX_FOLDER}"
 SectionEnd
 
 SectionGroup /e "Lua" SectLua

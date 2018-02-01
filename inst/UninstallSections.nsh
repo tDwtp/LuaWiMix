@@ -66,11 +66,11 @@ Section	"un.-RunLast" UnSectRunLast
 	
 	; MessageBox MB_YESNO "remove uninstaller?" /SD IDYES IDNO DontRemoveUninstaller
 		DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
-		Delete $INSTDIR\uninstall.exe
+		Delete "$INSTDIR\uninstall.exe"
 	; DontRemoveUninstaller:
 	
 	; MessageBox MB_YESNO "remove install dir (only works if empty)?" /SD IDYES IDNO DontRemoveDir
-		RMDir $INSTDIR
+		RMDir "$INSTDIR"
 	; DontRemoveDir:
 SectionEnd
 

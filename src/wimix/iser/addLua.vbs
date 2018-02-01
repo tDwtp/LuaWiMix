@@ -34,10 +34,10 @@ If Not objFso.FileExists(instDir & "\wimix\arc\lua"& major & minor &".zip") Then
 End If
 
 objFso.CreateFolder(instDir & "\" & major & minor)
-objFso.CreateFolder(instDir & "\" & major & minor & "\include")
-objFso.CreateFolder(instDir & "\" & major & minor & "\libs")
+Rem objFso.CreateFolder(instDir & "\" & major & minor & "\include")
+Rem objFso.CreateFolder(instDir & "\" & major & minor & "\lib")
 objFso.CreateFolder(instDir & "\" & major & minor & "\clibs")
-objFso.CreateFolder(instDir & "\" & major & minor & "\lua")
+Rem objFso.CreateFolder(instDir & "\" & major & minor & "\lua")
 objFso.CreateFolder(instDir & "\" & major & minor & "\examples")
 objFso.CreateFolder(instDir & "\" & major & minor & "\docs")
 
